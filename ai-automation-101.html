@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Automation 101 — A1 Alliance</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #050810;
+    --surface: #0c1120;
+    --surface2: #111827;
+    --border: rgba(99,179,237,0.12);
+    --accent: #38bdf8;
+    --accent2: #818cf8;
+    --accent3: #34d399;
+    --gold: #fbbf24;
+    --red: #f87171;
+    --purple: #c084fc;
+    --text: #e2e8f0;
+    --muted: #64748b;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  body::before {
+    content:'';
+    position:fixed;
+    inset:0;
+    background-image:
+      linear-gradient(rgba(56,189,248,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(56,189,248,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .deck { position:relative; width:100vw; height:100vh; z-index:1; }
+
+  .slide {
+    position:absolute; inset:0;
+    display:flex; flex-direction:column;
+    justify-content:center; align-items:center;
+    padding:60px 80px;
+    opacity:0;
+    transform:translateX(60px);
+    transition:opacity 0.5s cubic-bezier(0.4,0,0.2,1), transform 0.5s cubic-bezier(0.4,0,0.2,1);
+    pointer-events:none;
+    overflow:hidden;
+  }
+  .slide.active { opacity:1; transform:translateX(0); pointer-events:all; }
+  .slide.exit-left { opacity:0; transform:translateX(-60px); }
+
+  .nav {
+    position:fixed; bottom:36px; left:50%; transform:translateX(-50%);
+    display:flex; align-items:center; gap:20px; z-index:100;
+    background:rgba(12,17,32,0.85);
+    border:1px solid var(--border);
+    border-radius:100px;
+    padding:10px 24px;
+    backdrop-filter:blur(12px);
+  }
+  .nav-btn {
+    background:none; border:none; color:var(--muted);
+    cursor:pointer; font-size:18px; padding:4px 8px;
+    border-radius:6px;
+    transition:color 0.2s, background 0.2s;
+    font-family:'DM Mono', monospace;
+  }
+  .nav-btn:hover { color:var(--accent); background:rgba(56,189,248,0.08); }
+  .nav-btn:disabled { opacity:0.2; cursor:not-allowed; }
+  .nav-counter { font-family:'DM Mono',monospace; font-size:12px; color:var(--muted); letter-spacing:2px; min-width:60px; text-align:center; }
+  .nav-dots { display:flex; gap:6px; align-items:center; }
+  .nav-dot {
+    width:6px; height:6px; border-radius:50%;
+    background:var(--muted); opacity:0.3;
+    transition:all 0.3s; cursor:pointer;
+  }
+  .nav-dot.active { background:var(--gold); opacity:1; width:20px; border-radius:3px; }
+
+  .slide-label {
+    position:fixed; top:28px; left:50%; transform:translateX(-50%);
+    font-family:'DM Mono',monospace; font-size:10px;
+    letter-spacing:3px; color:var(--muted); text-transform:uppercase;
+    z-index:100; display:flex; align-items:center; gap:12px;
+  }
+  .slide-label .brand { color:var(--gold); opacity:0.9; }
+  .slide-label .sep { opacity:0.2; }
+
+  .key-hint {
+    position:fixed; top:28px; right:36px;
+    font-family:'DM Mono',monospace; font-size:10px;
+    color:var(--muted); opacity:0.5; letter-spacing:1px; z-index:100;
+  }
+
+  .badge {
+    display:inline-block;
+    background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.3);
+    color:var(--gold); font-family:'DM Mono',monospace;
+    font-size:10px; letter-spacing:3px; padding:5px 14px;
+    border-radius:100px; text-transform:uppercase; margin-bottom:20px;
+  }
+  .badge.green { background:rgba(52,211,153,0.1); border-color:rgba(52,211,153,0.3); color:var(--accent3); }
+  .badge.blue { background:rgba(56,189,248,0.1); border-color:rgba(56,189,248,0.3); color:var(--accent); }
+  .badge.purple { background:rgba(129,140,248,0.1); border-color:rgba(129,140,248,0.3); color:var(--accent2); }
+  .badge.red { background:rgba(248,113,113,0.1); border-color:rgba(248,113,113,0.3); color:var(--red); }
+
+  .display {
+    font-family:'Syne',sans-serif;
+    font-size:clamp(36px,5vw,62px);
+    font-weight:800; line-height:1.05;
+    background:linear-gradient(135deg, #e2e8f0 0%, #fbbf24 40%, #f97316 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    margin-bottom:16px; text-align:center;
+  }
+  .heading {
+    font-family:'Syne',sans-serif;
+    font-size:clamp(22px,3vw,36px); font-weight:700;
+    color:var(--text); margin-bottom:12px;
+  }
+  .subtext { font-size:16px; color:var(--muted); line-height:1.65; max-width:600px; text-align:center; }
+  .section-eyebrow {
+    font-family:'DM Mono',monospace; font-size:10px;
+    letter-spacing:4px; text-transform:uppercase; color:var(--gold); margin-bottom:8px;
+  }
+
+  .card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:16px; padding:28px; position:relative; overflow:hidden;
+  }
+  .card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:1px;
+    background:linear-gradient(90deg, transparent, rgba(251,191,36,0.4), transparent);
+  }
+  .card.blue::before { background:linear-gradient(90deg, transparent, rgba(56,189,248,0.4), transparent); }
+  .card.green::before { background:linear-gradient(90deg, transparent, rgba(52,211,153,0.4), transparent); }
+  .card.purple::before { background:linear-gradient(90deg, transparent, rgba(129,140,248,0.4), transparent); }
+  .card.red::before { background:linear-gradient(90deg, transparent, rgba(248,113,113,0.4), transparent); }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; width:100%; max-width:1000px; }
+  .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; width:100%; max-width:1000px; }
+
+  .orb {
+    position:absolute; border-radius:50%;
+    pointer-events:none; filter:blur(80px); opacity:0.1;
+  }
+  .orb-1 { width:500px; height:500px; background:#fbbf24; top:-100px; right:-100px; }
+  .orb-2 { width:400px; height:400px; background:#f97316; bottom:-80px; left:-80px; }
+  .orb-3 { width:300px; height:300px; background:#34d399; top:50%; left:50%; transform:translate(-50%,-50%); }
+
+  .feature-row {
+    display:flex; align-items:flex-start; gap:16px;
+    padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.04);
+  }
+  .feature-row:last-child { border-bottom:none; }
+  .feat-icon {
+    width:36px; height:36px; border-radius:10px;
+    background:rgba(251,191,36,0.08);
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px; flex-shrink:0;
+  }
+  .feat-text h4 { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; margin-bottom:3px; }
+  .feat-text p { font-size:12px; color:var(--muted); line-height:1.5; }
+
+  .money-card {
+    background:var(--surface2); border:1px solid var(--border);
+    border-radius:14px; padding:22px 24px;
+  }
+  .money-card h4 { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; margin-bottom:6px; }
+  .money-card p { font-size:13px; color:var(--muted); line-height:1.6; }
+  .money-tag {
+    display:inline-block; font-family:'DM Mono',monospace; font-size:10px;
+    padding:3px 10px; border-radius:100px; margin-bottom:10px;
+    text-transform:uppercase; letter-spacing:2px;
+  }
+
+  .truth-item {
+    display:flex; gap:14px; align-items:flex-start;
+    padding:16px 0; border-bottom:1px solid rgba(255,255,255,0.05);
+  }
+  .truth-item:last-child { border-bottom:none; }
+  .truth-num {
+    font-family:'DM Mono',monospace; font-size:11px;
+    background:rgba(251,191,36,0.1); color:var(--gold);
+    border:1px solid rgba(251,191,36,0.2);
+    padding:3px 10px; border-radius:100px;
+    white-space:nowrap; flex-shrink:0; margin-top:2px;
+  }
+  .truth-body h4 { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; margin-bottom:3px; }
+  .truth-body p { font-size:12px; color:var(--muted); line-height:1.5; }
+
+  .cta-box {
+    background:var(--surface); border:1px solid rgba(251,191,36,0.2);
+    border-radius:20px; padding:48px 60px; text-align:center; max-width:660px;
+    position:relative; overflow:hidden;
+  }
+  .cta-box::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:1px;
+    background:linear-gradient(90deg, transparent, rgba(251,191,36,0.6), rgba(249,115,22,0.6), transparent);
+  }
+</style>
+</head>
+<body>
+
+<div class="slide-label">
+  <span class="brand">A1 Alliance</span>
+  <span class="sep">|</span>
+  <span id="slideTitle">AI Automation 101</span>
+</div>
+
+<div class="key-hint">← → or click arrows</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)" disabled>←</button>
+  <div class="nav-dots" id="navDots"></div>
+  <span class="nav-counter" id="counter">01 / 07</span>
+  <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">→</button>
+</div>
+
+<div class="deck">
+
+<!-- SLIDE 1: TITLE -->
+<div class="slide active" data-title="AI Automation 101">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="badge">Free Education</div>
+  <div class="display">AI Automation 101</div>
+  <p class="subtext">Everything you need to understand what AI automation actually is, how people make real money with it, and whether this path is right for you.</p>
+  <div style="margin-top:36px; display:flex; gap:16px; flex-wrap:wrap; justify-content:center;">
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px 24px; font-family:'DM Mono',monospace; font-size:12px; color:var(--muted);">
+      💛 By Mason Harold
+    </div>
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px 24px; font-family:'DM Mono',monospace; font-size:12px; color:var(--muted);">
+      🏢 Founder, A1 Innovations
+    </div>
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px 24px; font-family:'DM Mono',monospace; font-size:12px; color:var(--muted);">
+      ⚡ No fluff. No hype. Real talk.
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 2: WHAT AI AUTOMATION ACTUALLY IS -->
+<div class="slide" data-title="What It Actually Is">
+  <div class="orb orb-2"></div>
+  <div style="width:100%; max-width:900px;">
+    <div class="section-eyebrow">Let's be real first</div>
+    <div class="heading" style="margin-bottom:8px;">AI is not going to do everything for you.</div>
+    <p style="font-size:14px; color:var(--muted); margin-bottom:28px;">This is an opportunity for capable, creative people to take action and use AI as an advantage — not a shortcut that replaces effort.</p>
+    <div class="grid-2" style="align-items:start;">
+      <div class="card red">
+        <div style="font-family:'DM Mono',monospace; font-size:10px; color:var(--red); letter-spacing:2px; margin-bottom:14px; text-transform:uppercase;">⚠ What It's NOT</div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; gap:10px; align-items:flex-start; font-size:14px;">
+            <span style="color:var(--red); margin-top:2px;">•</span>
+            <span>A magic money machine that runs itself</span>
+          </div>
+          <div style="display:flex; gap:10px; align-items:flex-start; font-size:14px;">
+            <span style="color:var(--red); margin-top:2px;">•</span>
+            <span>Something that replaces hard work and outreach</span>
+          </div>
+          <div style="display:flex; gap:10px; align-items:flex-start; font-size:14px;">
+            <span style="color:var(--red); margin-top:2px;">•</span>
+            <span>A get rich quick scheme — it's a real business</span>
+          </div>
+        </div>
+      </div>
+      <div class="card green">
+        <div style="font-family:'DM Mono',monospace; font-size:10px; color:var(--accent3); letter-spacing:2px; margin-bottom:14px; text-transform:uppercase;">✅ What It IS</div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; gap:10px; align-items:flex-start; font-size:14px;">
+            <span style="color:var(--accent3); margin-top:2px;">→</span>
+            <span>A real service businesses genuinely need and pay for</span>
+          </div>
+          <div style="display:flex; gap:10px; align-items:flex-start; font-size:14px;">
+            <span style="color:var(--accent3); margin-top:2px;">→</span>
+            <span>An advantage for people willing to do the work</span>
+          </div>
+          <div style="display:flex; gap:10px; align-items:flex-start; font-size:14px;">
+            <span style="color:var(--accent3); margin-top:2px;">→</span>
+            <span>A scalable business model built on real results</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 3: THE ACTUAL OPPORTUNITY -->
+<div class="slide" data-title="The Opportunity">
+  <div class="orb orb-1"></div>
+  <div style="width:100%; max-width:960px;">
+    <div class="section-eyebrow">What we actually do</div>
+    <div class="heading" style="margin-bottom:8px;">We solve business problems using AI on the back end.</div>
+    <p style="font-size:14px; color:var(--muted); margin-bottom:28px; max-width:700px;">Businesses waste enormous time on repetitive tasks that cut into their profit and bottleneck their growth. We are the people who fix that — not by redesigning their whole business, but by solving specific problems with AI systems and workflows.</p>
+    <div class="grid-3">
+      <div class="card blue">
+        <div style="font-size:28px; margin-bottom:14px;">🔁</div>
+        <h4 style="font-family:'Syne',sans-serif; font-weight:700; font-size:15px; margin-bottom:6px; color:var(--accent);">Repetitive Tasks</h4>
+        <p style="font-size:13px; color:var(--muted); line-height:1.5;">Businesses do the same tasks over and over — follow-ups, data entry, scheduling, lead responses. This costs them time and money every single day.</p>
+      </div>
+      <div class="card">
+        <div style="font-size:28px; margin-bottom:14px;">⚡</div>
+        <h4 style="font-family:'Syne',sans-serif; font-weight:700; font-size:15px; margin-bottom:6px;">Our Role</h4>
+        <p style="font-size:13px; color:var(--muted); line-height:1.5;">We build AI systems that handle those tasks automatically. We are not selling AI — we are selling solutions to real problems that businesses already have.</p>
+      </div>
+      <div class="card purple">
+        <div style="font-size:28px; margin-bottom:14px;">📈</div>
+        <h4 style="font-family:'Syne',sans-serif; font-weight:700; font-size:15px; margin-bottom:6px; color:var(--accent2);">The Result</h4>
+        <p style="font-size:13px; color:var(--muted); line-height:1.5;">They save time, make more money, and run more efficiently. We get paid well for building the system that made it happen.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 4: HOW TO MAKE MONEY -->
+<div class="slide" data-title="How to Make Money">
+  <div class="orb orb-2"></div>
+  <div style="width:100%; max-width:900px;">
+    <div class="section-eyebrow">Three paths</div>
+    <div class="heading" style="margin-bottom:28px;">How people actually make money with AI automation</div>
+    <div style="display:flex; flex-direction:column; gap:16px;">
+      <div class="money-card">
+        <span class="money-tag" style="background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.3); color:var(--gold);">Path 01 — Selling</span>
+        <h4>Agency Owner / Sales Rep</h4>
+        <p>This is where the real money is. You do outreach, talk to business owners, identify their problems, and sell the automation solution. As an agency owner you run the whole operation. As a sales rep you close deals for someone else's agency and earn 20–30%+ commission on every sale. No code required — just sales skills and hustle.</p>
+      </div>
+      <div class="money-card">
+        <span class="money-tag" style="background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.3); color:var(--accent);">Path 02 — Developing</span>
+        <h4>Backend Developer / Builder</h4>
+        <p>You're behind the scenes building the actual automations. Agency owners send you the client brief and you build it. No sales calls, no client interaction — just building with tools like n8n, VAPI, and Claude. You can work with multiple agencies at once and get paid per build or on retainer.</p>
+      </div>
+      <div class="money-card">
+        <span class="money-tag" style="background:rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.3); color:var(--accent3);">Path 03 — Full Stack Founder</span>
+        <h4>Solo Founder Who Does Both</h4>
+        <p>You sell and you build — or you sell and hire developers to build. This is the agency owner model. Most successful founders start solo, close their first few clients, then hire developers on the back end so they can focus purely on sales and growth.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 5: THE HONEST TRUTH -->
+<div class="slide" data-title="The Honest Truth">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-3"></div>
+  <div style="width:100%; max-width:900px;">
+    <div class="section-eyebrow">What nobody tells you</div>
+    <div class="heading" style="margin-bottom:28px;">The thing I wish someone told me straight</div>
+    <div style="display:flex; flex-direction:column; gap:0;">
+      <div class="truth-item">
+        <span class="truth-num">01</span>
+        <div class="truth-body">
+          <h4>It's all outreach.</h4>
+          <p>Once you have a solid outreach system and you know how to sell, everything else falls into place. The product is easy. Getting in front of people consistently is the real work.</p>
+        </div>
+      </div>
+      <div class="truth-item">
+        <span class="truth-num">02</span>
+        <div class="truth-body">
+          <h4>Don't try to do everything yourself.</h4>
+          <p>The biggest mistake new agency owners make is trying to sell AND build AND manage clients all at once. Use leverage. Hire developers on the back end. Your job is to sell.</p>
+        </div>
+      </div>
+      <div class="truth-item">
+        <span class="truth-num">03</span>
+        <div class="truth-body">
+          <h4>You don't need to know how to code to start.</h4>
+          <p>You need to understand AI automation well enough to sell it and manage the process. The technical build can be outsourced. Sales cannot be outsourced when you're starting out.</p>
+        </div>
+      </div>
+      <div class="truth-item">
+        <span class="truth-num">04</span>
+        <div class="truth-body">
+          <h4>The minimum viable agency is simple.</h4>
+          <p>You, an outreach system, one or two core products, and a developer on the back end. That's it. You don't need a big team or a big budget to get your first client.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 6: IS THIS FOR YOU -->
+<div class="slide" data-title="Is This For You?">
+  <div class="orb orb-2"></div>
+  <div style="width:100%; max-width:900px;">
+    <div class="section-eyebrow">Be honest with yourself</div>
+    <div class="heading" style="margin-bottom:28px;">Who this is actually built for</div>
+    <div class="grid-2" style="align-items:start;">
+      <div style="display:flex; flex-direction:column; gap:14px;">
+        <div class="card green">
+          <div style="font-family:'DM Mono',monospace; font-size:10px; color:var(--accent3); letter-spacing:2px; margin-bottom:14px; text-transform:uppercase;">✅ This is for you if...</div>
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <div style="display:flex; gap:10px; align-items:flex-start; font-size:14px;">
+              <span style="color:var(--accent3); margin-top:2px;">→</span>
+              <span>You want to build a real business using AI</span>
+            </div>
+            <div style="display:flex; gap:10px; align-items:flex-start; font-size:14px;">
+              <span style="color:var(--accent3); margin-top:2px;">→</span>
+              <span>You're willing to do consistent outreach and put in the work</span>
+            </div>
+            <div style="display:flex; gap:10px; align-items:flex-start; font-size:14px;">
+              <span style="color:var(--accent3); margin-top:2px;">→</span>
+              <span>You can learn sales or already know how to sell</span>
+            </div>
+            <div style="display:flex; gap:10px; align-items:flex-start; font-size:14px;">
+              <span style="color:var(--accent3); margin-top:2px;">→</span>
+              <span>You want to help real businesses solve real problems</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:14px;">
+        <div class="card red">
+          <div style="font-family:'DM Mono',monospace; font-size:10px; color:var(--red); letter-spacing:2px; margin-bottom:14px; text-transform:uppercase;">⚠ This is NOT for you if...</div>
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <div style="display:flex; gap:10px; align-items:flex-start; font-size:14px;">
+              <span style="color:var(--red); margin-top:2px;">•</span>
+              <span>You want results without doing the outreach</span>
+            </div>
+            <div style="display:flex; gap:10px; align-items:flex-start; font-size:14px;">
+              <span style="color:var(--red); margin-top:2px;">•</span>
+              <span>You're looking for a passive income button to press</span>
+            </div>
+            <div style="display:flex; gap:10px; align-items:flex-start; font-size:14px;">
+              <span style="color:var(--red); margin-top:2px;">•</span>
+              <span>You're not willing to talk to business owners</span>
+            </div>
+            <div style="display:flex; gap:10px; align-items:flex-start; font-size:14px;">
+              <span style="color:var(--red); margin-top:2px;">•</span>
+              <span>You expect this to work without putting in real time</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7: NEXT STEPS -->
+<div class="slide" data-title="Your Next Move">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="cta-box">
+    <div class="badge">You're in the right place</div>
+    <div class="display" style="font-size:clamp(26px,3.5vw,44px);">Now let's actually build something.</div>
+    <p style="font-size:15px; color:var(--muted); margin-bottom:32px; line-height:1.6;">This community exists to give you the knowledge, tools, and connections to make this work — for free. Here's where to go next.</p>
+    <div style="display:flex; flex-direction:column; gap:12px; text-align:left; margin-bottom:32px;">
+      <div class="feature-row">
+        <div class="feat-icon">🛠️</div>
+        <div class="feat-text">
+          <h4>Check out #tools-and-resources</h4>
+          <p>The exact tech stack we use to build and sell AI automations — curated, not random.</p>
+        </div>
+      </div>
+      <div class="feature-row">
+        <div class="feat-icon">❓</div>
+        <div class="feat-text">
+          <h4>Ask in #questions-and-help</h4>
+          <p>Tag the A1 Alliance Bot or drop your question. No question is too basic here.</p>
+        </div>
+      </div>
+      <div class="feature-row">
+        <div class="feat-icon">👋</div>
+        <div class="feat-text">
+          <h4>Introduce yourself in #introduce-yourself</h4>
+          <p>Tell us who you are and what you're building. The community is how you grow.</p>
+        </div>
+      </div>
+    </div>
+    <div style="padding-top:20px; border-top:1px solid rgba(255,255,255,0.06); display:flex; flex-direction:column; gap:6px; align-items:center;">
+      <div style="font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:2px; text-transform:uppercase;">Built by Mason Harold</div>
+      <div style="font-size:15px; color:var(--gold);">A1 Innovations & A1 Alliance 💛</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<script>
+  let current = 0;
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  const counter = document.getElementById('counter');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const slideTitle = document.getElementById('slideTitle');
+  const dotsContainer = document.getElementById('navDots');
+
+  slides.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    dot.onclick = () => goTo(i);
+    dotsContainer.appendChild(dot);
+  });
+
+  function pad(n) { return n < 10 ? '0' + n : n; }
+
+  function goTo(index) {
+    if (index < 0 || index >= total) return;
+    const prev = slides[current];
+    prev.classList.remove('active');
+    prev.classList.add('exit-left');
+    setTimeout(() => prev.classList.remove('exit-left'), 500);
+    current = index;
+    slides[current].classList.add('active');
+    counter.textContent = pad(current + 1) + ' / ' + pad(total);
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === total - 1;
+    slideTitle.textContent = slides[current].dataset.title || 'AI Automation 101';
+    document.querySelectorAll('.nav-dot').forEach((d, i) => {
+      d.classList.toggle('active', i === current);
+    });
+  }
+
+  function changeSlide(dir) { goTo(current + dir); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changeSlide(-1);
+  });
+</script>
+</body>
+</html>
