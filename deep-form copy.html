@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A1 Alliance — Get Started</title>
+<style>
+    :root {
+        --bg: #0b0b0d;
+        --card: #17171b;
+        --border: #29292f;
+        --text: #f2f2f0;
+        --muted: #9a9aa4;
+        --accent: #ff5a1f;
+        --accent-hover: #ff7440;
+        --error: #ff5f5f;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        padding: 48px 16px;
+    }
+
+    .wrap {
+        width: 100%;
+        max-width: 560px;
+    }
+
+    .eyebrow {
+        color: var(--accent);
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
+
+    h1 {
+        font-size: 28px;
+        line-height: 1.25;
+        margin: 0 0 12px;
+    }
+
+    .sub {
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.5;
+        margin-bottom: 32px;
+    }
+
+    .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 28px;
+    }
+
+    .field {
+        margin-bottom: 22px;
+    }
+
+    .field:last-of-type {
+        margin-bottom: 0;
+    }
+
+    label {
+        display: block;
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 6px;
+    }
+
+    .hint {
+        color: var(--muted);
+        font-size: 12.5px;
+        margin: 0 0 8px;
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+        width: 100%;
+        background: #0f0f12;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        padding: 11px 12px;
+        font-size: 14.5px;
+        font-family: inherit;
+        outline: none;
+        transition: border-color 0.15s ease;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus {
+        border-color: var(--accent);
+    }
+
+    textarea {
+        min-height: 80px;
+        resize: vertical;
+    }
+
+    select {
+        appearance: none;
+        background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+        background-position: calc(100% - 18px) center, calc(100% - 13px) center;
+        background-size: 5px 5px, 5px 5px;
+        background-repeat: no-repeat;
+    }
+
+    .radio-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .radio-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 11px 12px;
+        cursor: pointer;
+        transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .radio-option:has(input:checked) {
+        border-color: var(--accent);
+        background: rgba(255, 90, 31, 0.08);
+    }
+
+    .radio-option input {
+        accent-color: var(--accent);
+        width: 16px;
+        height: 16px;
+    }
+
+    .radio-option span {
+        font-size: 14.5px;
+    }
+
+    button[type="submit"] {
+        width: 100%;
+        background: var(--accent);
+        color: #0b0b0d;
+        border: none;
+        border-radius: 8px;
+        padding: 14px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 28px;
+        transition: background 0.15s ease;
+    }
+
+    button[type="submit"]:hover:not(:disabled) {
+        background: var(--accent-hover);
+    }
+
+    button[type="submit"]:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .status {
+        margin-top: 14px;
+        font-size: 13.5px;
+        text-align: center;
+    }
+
+    .status.error {
+        color: var(--error);
+    }
+
+    .success {
+        text-align: center;
+        padding: 20px 0;
+    }
+
+    .success h2 {
+        font-size: 22px;
+        margin: 0 0 10px;
+    }
+
+    .success p {
+        color: var(--muted);
+        font-size: 14.5px;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .hidden {
+        display: none;
+    }
+</style>
+</head>
+<body>
+<div class="wrap">
+    <div class="eyebrow">A1 Alliance</div>
+    <h1>Let's figure out where you're at.</h1>
+    <p class="sub">No fluff — just answer straight so I can point you at the right thing instead of wasting your time. Takes 2 minutes.</p>
+
+    <div class="card">
+        <form id="intake-form">
+            <input type="hidden" id="discord_id" name="discord_id">
+
+            <div class="field">
+                <label for="experience_level">What's your experience level with AI automation?</label>
+                <input type="text" id="experience_level" name="experience_level" placeholder="e.g. total beginner, dabbled a bit, been building for a while" required>
+            </div>
+
+            <div class="field">
+                <label for="current_situation">Where are you right now with this?</label>
+                <p class="hint">Business, job, side hustle — whatever's relevant.</p>
+                <textarea id="current_situation" name="current_situation" required></textarea>
+            </div>
+
+            <div class="field">
+                <label for="ninety_day_goal">What do you want to have happen in the next 90 days?</label>
+                <textarea id="ninety_day_goal" name="ninety_day_goal" required></textarea>
+            </div>
+
+            <div class="field">
+                <label for="biggest_blocker">What's the #1 thing stopping you right now?</label>
+                <textarea id="biggest_blocker" name="biggest_blocker" required></textarea>
+            </div>
+
+            <div class="field">
+                <label for="budget">What's your budget to solve this?</label>
+                <select id="budget" name="budget" required>
+                    <option value="" disabled selected>Select a range</option>
+                    <option value="under $500">Under $500</option>
+                    <option value="$500-$2,000">$500 – $2,000</option>
+                    <option value="$2,000-$5,000">$2,000 – $5,000</option>
+                    <option value="$5,000+">$5,000+</option>
+                    <option value="not sure yet">Not sure yet</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>Where are you at, honestly?</label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="readiness" value="ready now" required>
+                        <span>Ready now — I want to move</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="readiness" value="learn first">
+                        <span>I want to learn first</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="readiness" value="just looking">
+                        <span>Just looking around</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="attribution">How'd you find A1 Alliance?</label>
+                <input type="text" id="attribution" name="attribution" required>
+            </div>
+
+            <button type="submit">Submit</button>
+            <p class="status" id="status"></p>
+        </form>
+
+        <div class="success hidden" id="success">
+            <h2>You're in 👊</h2>
+            <p>Got it — head back to your thread in Discord. I'll take a look and point you where to go next.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_BASE_URL = 'https://a1-alliance-discord-bot-production.up.railway.app';
+
+    const params = new URLSearchParams(window.location.search);
+    const discordId = params.get('discord_id') || '';
+    document.getElementById('discord_id').value = discordId;
+
+    const form = document.getElementById('intake-form');
+    const statusEl = document.getElementById('status');
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        statusEl.textContent = '';
+        statusEl.className = 'status';
+
+        if (!discordId) {
+            statusEl.textContent = "Missing your Discord ID — open this form using the link the bot sent you.";
+            statusEl.className = 'status error';
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+
+        const payload = {
+            discord_id: discordId,
+            experience_level: document.getElementById('experience_level').value.trim(),
+            current_situation: document.getElementById('current_situation').value.trim(),
+            ninety_day_goal: document.getElementById('ninety_day_goal').value.trim(),
+            biggest_blocker: document.getElementById('biggest_blocker').value.trim(),
+            budget: document.getElementById('budget').value,
+            readiness: form.querySelector('input[name="readiness"]:checked')?.value || '',
+            attribution: document.getElementById('attribution').value.trim(),
+        };
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/form-submit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                throw new Error('Request failed');
+            }
+
+            form.classList.add('hidden');
+            document.getElementById('success').classList.remove('hidden');
+        } catch (error) {
+            statusEl.textContent = "Something went wrong submitting this — try again in a minute.";
+            statusEl.className = 'status error';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit';
+        }
+    });
+</script>
+</body>
+</html>
