@@ -32,6 +32,48 @@
     .wrap {
         width: 100%;
         max-width: 560px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .particles {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .particle {
+        position: absolute;
+        bottom: -20px;
+        left: var(--left);
+        width: var(--size);
+        height: var(--size);
+        background: var(--accent);
+        border-radius: 50%;
+        opacity: 0;
+        filter: blur(0.5px);
+        animation: particle-float var(--duration) linear infinite;
+        animation-delay: var(--delay);
+        will-change: transform, opacity;
+    }
+
+    @keyframes particle-float {
+        0%   { transform: translateY(0) scale(1); opacity: 0; }
+        10%  { opacity: 0.45; }
+        85%  { opacity: 0.3; }
+        100% { transform: translateY(-110vh) scale(0.8); opacity: 0; }
+    }
+
+    .stagger-item {
+        opacity: 0;
+        transform: translateY(14px);
+        animation: fadeSlideIn 0.5s ease forwards;
+    }
+
+    @keyframes fadeSlideIn {
+        to { opacity: 1; transform: translateY(0); }
     }
 
     .eyebrow {
@@ -186,11 +228,29 @@
     .success {
         text-align: center;
         padding: 20px 0;
+        opacity: 0;
+    }
+
+    .success.fade-in {
+        animation: fadeIn 0.4s ease forwards;
+    }
+
+    @keyframes fadeIn {
+        to { opacity: 1; }
     }
 
     .success h2 {
         font-size: 22px;
         margin: 0 0 10px;
+    }
+
+    .pop-in {
+        animation: popIn 0.35s ease forwards;
+    }
+
+    @keyframes popIn {
+        from { opacity: 0; transform: scale(0.94); }
+        to   { opacity: 1; transform: scale(1); }
     }
 
     .success p {
@@ -200,43 +260,71 @@
         margin: 0;
     }
 
+    #success-body {
+        min-height: 3.2em;
+    }
+
     .hidden {
         display: none;
+    }
+
+    #intake-form {
+        transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    #intake-form.fade-out {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .particles {
+            display: none;
+        }
+
+        .stagger-item,
+        .particle,
+        .pop-in {
+            animation: none !important;
+            opacity: 1 !important;
+            transform: none !important;
+        }
     }
 </style>
 </head>
 <body>
+<div class="particles" id="particles" aria-hidden="true"></div>
 <div class="wrap">
-    <div class="eyebrow">A1 Alliance</div>
-    <h1>Let's figure out where you're at.</h1>
-    <p class="sub">No fluff — just answer straight so I can point you at the right thing instead of wasting your time. Takes 2 minutes.</p>
+    <div class="eyebrow stagger-item">A1 Alliance</div>
+    <h1 class="stagger-item">Let's figure out where you're at.</h1>
+    <p class="sub stagger-item">No fluff — just answer straight so I can point you at the right thing instead of wasting your time. Takes 2 minutes.</p>
 
-    <div class="card">
+    <div class="card stagger-item">
         <form id="intake-form">
             <input type="hidden" id="discord_id" name="discord_id">
 
-            <div class="field">
+            <div class="field stagger-item">
                 <label for="experience_level">What's your experience level with AI automation?</label>
                 <input type="text" id="experience_level" name="experience_level" placeholder="e.g. total beginner, dabbled a bit, been building for a while" required>
             </div>
 
-            <div class="field">
+            <div class="field stagger-item">
                 <label for="current_situation">Where are you right now with this?</label>
                 <p class="hint">Business, job, side hustle — whatever's relevant.</p>
                 <textarea id="current_situation" name="current_situation" required></textarea>
             </div>
 
-            <div class="field">
+            <div class="field stagger-item">
                 <label for="ninety_day_goal">What do you want to have happen in the next 90 days?</label>
                 <textarea id="ninety_day_goal" name="ninety_day_goal" required></textarea>
             </div>
 
-            <div class="field">
+            <div class="field stagger-item">
                 <label for="biggest_blocker">What's the #1 thing stopping you right now?</label>
                 <textarea id="biggest_blocker" name="biggest_blocker" required></textarea>
             </div>
 
-            <div class="field">
+            <div class="field stagger-item">
                 <label for="budget">What's your budget to solve this?</label>
                 <select id="budget" name="budget" required>
                     <option value="" disabled selected>Select a range</option>
@@ -248,7 +336,7 @@
                 </select>
             </div>
 
-            <div class="field">
+            <div class="field stagger-item">
                 <label>Where are you at, honestly?</label>
                 <div class="radio-group">
                     <label class="radio-option">
@@ -266,25 +354,53 @@
                 </div>
             </div>
 
-            <div class="field">
+            <div class="field stagger-item">
                 <label for="attribution">How'd you find A1 Alliance?</label>
                 <input type="text" id="attribution" name="attribution" required>
             </div>
 
-            <button type="submit">Submit</button>
+            <button type="submit" class="stagger-item">Submit</button>
             <p class="status" id="status"></p>
         </form>
 
         <div class="success hidden" id="success">
-            <h2>You're in 👊</h2>
-            <p>Got it — head back to your thread in Discord. I'll take a look and point you where to go next.</p>
+            <h2 class="pop-in">You're in. 🎉</h2>
+            <p id="success-body"></p>
         </div>
     </div>
 </div>
 
 <script>
-    // Swap this to the deployed Railway URL after the web service is live.
-   const API_BASE_URL = 'https://a1-alliance-discord-bot-production.up.railway.app';
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function createParticles() {
+        const container = document.getElementById('particles');
+        const COUNT = 16;
+        for (let i = 0; i < COUNT; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            const duration = 10 + Math.random() * 10; // 10–20s
+            p.style.setProperty('--left', `${Math.random() * 100}%`);
+            p.style.setProperty('--size', `${2 + Math.random() * 3}px`);
+            p.style.setProperty('--duration', `${duration}s`);
+            p.style.setProperty('--delay', `${-Math.random() * duration}s`); // negative delay avoids a synchronized "burst"
+            container.appendChild(p);
+        }
+    }
+
+    function runEntranceStagger() {
+        const items = document.querySelectorAll('.stagger-item');
+        items.forEach((el, i) => {
+            el.style.animationDelay = `${i * 70}ms`;
+        });
+    }
+
+    if (!prefersReducedMotion) {
+        createParticles();
+        runEntranceStagger();
+    }
+
+    const API_BASE_URL = 'https://a1-alliance-discord-bot-production.up.railway.app';
 
     const params = new URLSearchParams(window.location.search);
     const discordId = params.get('discord_id') || '';
@@ -293,6 +409,42 @@
     const form = document.getElementById('intake-form');
     const statusEl = document.getElementById('status');
     const submitBtn = form.querySelector('button[type="submit"]');
+
+    const SUCCESS_BODY_TEXT = "Head back to your Discord thread — the A1 bot's already reviewing your answers, and a team member will be with you shortly. Talk soon.";
+    const FORM_FADE_MS = 250;
+    const TYPEWRITER_START_DELAY_MS = 200;
+    const TYPEWRITER_SPEED_MS = 20;
+
+    function typewriter(el, text) {
+        if (prefersReducedMotion) {
+            el.textContent = text;
+            return;
+        }
+        let i = 0;
+        const timer = setInterval(() => {
+            el.textContent = text.slice(0, ++i);
+            if (i >= text.length) clearInterval(timer);
+        }, TYPEWRITER_SPEED_MS);
+    }
+
+    function showSuccess() {
+        const successEl = document.getElementById('success');
+        const bodyEl = document.getElementById('success-body');
+
+        const reveal = () => {
+            form.classList.add('hidden');
+            successEl.classList.remove('hidden');
+            successEl.classList.add('fade-in');
+            setTimeout(() => typewriter(bodyEl, SUCCESS_BODY_TEXT), TYPEWRITER_START_DELAY_MS);
+        };
+
+        if (prefersReducedMotion) {
+            reveal();
+            return;
+        }
+        form.classList.add('fade-out');
+        setTimeout(reveal, FORM_FADE_MS);
+    }
 
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -330,8 +482,7 @@
                 throw new Error('Request failed');
             }
 
-            form.classList.add('hidden');
-            document.getElementById('success').classList.remove('hidden');
+            showSuccess();
         } catch (error) {
             statusEl.textContent = "Something went wrong submitting this — try again in a minute.";
             statusEl.className = 'status error';
