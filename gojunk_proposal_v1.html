@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GoJunk LLC — A1 Innovations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700;1,800&family=Barlow+Condensed:wght@400;500;600;700;800;900&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #0a0a0a;
+  --dark: #111111;
+  --dark2: #1a1a1a;
+  --dark3: #222222;
+  --green: #22c55e;
+  --green2: #16a34a;
+  --green-dim: rgba(34,197,94,0.1);
+  --green-border: rgba(34,197,94,0.25);
+  --white: #f5f5f5;
+  --muted: #888888;
+  --muted2: #555555;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.04);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'Barlow', sans-serif;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* grid bg */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(34,197,94,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34,197,94,0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none; z-index: 0;
+}
+
+.deck { position: relative; width: 100vw; height: 100vh; z-index: 1; }
+
+/* SLIDES */
+.slide {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  padding: 62px 72px 52px;
+  opacity: 0; transform: translateX(40px);
+  transition: opacity 0.45s cubic-bezier(0.4,0,0.2,1), transform 0.45s cubic-bezier(0.4,0,0.2,1);
+  pointer-events: none; overflow: hidden;
+}
+.slide.active { opacity: 1; transform: translateX(0); pointer-events: all; }
+.slide.exit-left { opacity: 0; transform: translateX(-40px); }
+
+/* NAV */
+.nav {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 16px; z-index: 200;
+  background: rgba(17,17,17,0.95); border: 1px solid var(--border);
+  border-radius: 100px; padding: 9px 20px; backdrop-filter: blur(12px);
+}
+.nav-btn {
+  background: none; border: none; color: var(--muted);
+  cursor: pointer; font-size: 16px; padding: 4px 10px;
+  border-radius: 6px; transition: color 0.2s, background 0.2s;
+  font-family: 'DM Mono', monospace;
+}
+.nav-btn:hover { color: var(--green); background: var(--green-dim); }
+.nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+.nav-counter { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 2px; min-width: 48px; text-align: center; }
+.nav-dots { display: flex; gap: 5px; align-items: center; }
+.nav-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--muted2); opacity: 0.4; transition: all 0.3s; cursor: pointer; }
+.nav-dot.active { background: var(--green); opacity: 1; width: 18px; border-radius: 3px; }
+
+/* TOPBAR */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; height: 48px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; z-index: 200;
+  background: rgba(10,10,10,0.95); border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+}
+.topbar-brand { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: 3px; text-transform: uppercase; }
+.topbar-brand span { color: var(--green); }
+.topbar-right { display: flex; align-items: center; gap: 20px; }
+.slide-title-top { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 1px; }
+.key-hint { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted2); }
+
+/* TYPE */
+.eyebrow {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 4px; text-transform: uppercase;
+  color: var(--green); margin-bottom: 10px; display: block;
+}
+.display {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: clamp(42px,6vw,84px); font-weight: 900; line-height: 0.95;
+  text-transform: uppercase; color: var(--white);
+  margin-bottom: 16px; text-align: center; letter-spacing: -1px;
+}
+.display .green { color: var(--green); }
+.display .stroke {
+  -webkit-text-stroke: 2px var(--white); color: transparent;
+}
+.heading {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: clamp(24px,3.2vw,46px); font-weight: 800; line-height: 1.05;
+  text-transform: uppercase; color: var(--white); letter-spacing: -0.5px;
+}
+.heading .green { color: var(--green); }
+.subtext { font-size: 14px; color: var(--muted); line-height: 1.7; max-width: 540px; text-align: center; font-weight: 400; }
+
+/* CARDS */
+.card {
+  background: var(--dark2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 18px 20px; position: relative;
+}
+.card-green { border-color: var(--green-border); background: var(--green-dim); }
+.card-dark { background: var(--dark3); border-color: var(--border2); }
+
+/* BADGE / PILL */
+.pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  border-radius: 4px; padding: 4px 12px;
+  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+}
+.pill-green { background: var(--green-dim); color: var(--green); border: 1px solid var(--green-border); }
+.pill-white { background: rgba(245,245,245,0.06); color: var(--white); border: 1px solid var(--border); }
+.pill-dark { background: var(--dark3); color: var(--muted); border: 1px solid var(--border); }
+
+/* CHECK ITEM */
+.check { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--muted); margin-bottom: 8px; line-height: 1.5; }
+.check:last-child { margin-bottom: 0; }
+.check-mark { color: var(--green); font-size: 12px; margin-top: 2px; flex-shrink: 0; font-family: 'DM Mono', monospace; }
+
+/* FEATURE ROW */
+.feat {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 11px 0; border-bottom: 1px solid var(--border2);
+}
+.feat:last-child { border-bottom: none; }
+.feat-icon {
+  width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0;
+  background: var(--green-dim); border: 1px solid var(--green-border);
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+.feat-icon.white { background: rgba(245,245,245,0.05); border-color: var(--border); }
+.feat h4 { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; color: var(--white); }
+.feat p { font-size: 12px; color: var(--muted); line-height: 1.55; }
+
+/* FLOW STEP */
+.flow {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 10px 0; border-bottom: 1px solid var(--border2);
+}
+.flow:last-child { border-bottom: none; }
+.flow-num {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 800;
+  width: 28px; height: 28px; border-radius: 4px; flex-shrink: 0;
+  background: var(--green); color: var(--black);
+  display: flex; align-items: center; justify-content: center; margin-top: 1px;
+}
+.flow h4 { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; color: var(--white); }
+.flow p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+/* GRIDS */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%; max-width: 980px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; width: 100%; max-width: 980px; }
+.g4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; width: 100%; max-width: 980px; }
+
+/* STAT */
+.stat { text-align: center; padding: 16px 12px; }
+.stat-num { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(28px,3.5vw,48px); font-weight: 900; color: var(--green); line-height: 1; text-transform: uppercase; }
+.stat-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-top: 5px; }
+
+/* SMS BUBBLES */
+.bubble {
+  padding: 9px 13px; border-radius: 10px; font-size: 12px; line-height: 1.55;
+  max-width: 88%; opacity: 0; transform: translateY(6px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.bubble.show { opacity: 1; transform: translateY(0); }
+.bubble-out { background: var(--green); color: var(--black); font-weight: 500; border-radius: 10px 10px 2px 10px; align-self: flex-end; }
+.bubble-in { background: var(--dark3); color: var(--white); border: 1px solid var(--border); border-radius: 10px 10px 10px 2px; }
+.bubble-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted2); margin-bottom: 4px; opacity: 0; transition: opacity 0.3s ease; }
+.bubble-label.show { opacity: 1; }
+
+/* CALL NODES */
+.cnode {
+  background: var(--dark2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 14px;
+  display: flex; align-items: center; gap: 10px;
+  opacity: 0; transform: translateX(-10px);
+  transition: opacity 0.4s ease, transform 0.4s ease, border-color 0.3s, background 0.3s;
+  width: 100%;
+}
+.cnode.show { opacity: 1; transform: translateX(0); }
+.cnode.active { border-color: var(--green-border); background: var(--green-dim); }
+.cnode.done { border-color: rgba(34,197,94,0.4); }
+.cnode-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted2); flex-shrink: 0; transition: background 0.3s; }
+.cnode.active .cnode-dot { background: var(--green); }
+.cnode.done .cnode-dot { background: var(--green); }
+.cnode-text { font-size: 12px; color: var(--white); }
+.cnode-sub { font-size: 10px; color: var(--muted); margin-top: 1px; }
+.connector { width: 1px; height: 12px; background: var(--green-border); margin: 0 0 0 18px; opacity: 0; transition: opacity 0.3s ease; }
+.connector.show { opacity: 1; }
+
+/* CTA BTN */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--green); color: var(--black);
+  border: none; border-radius: 6px; padding: 12px 24px;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 800;
+  letter-spacing: 2px; text-transform: uppercase; cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+.btn:hover { background: #16a34a; transform: translateY(-1px); }
+.btn-outline {
+  background: transparent; color: var(--white);
+  border: 1px solid var(--border);
+}
+.btn-outline:hover { background: var(--dark3); transform: translateY(-1px); }
+
+/* ACCENT */
+.accent-bar { width: 40px; height: 3px; background: var(--green); margin: 0 0 16px; }
+.accent-bar.center { margin: 0 auto 16px; }
+
+.slide-inner { width: 100%; max-width: 980px; }
+.divider { width: 100%; height: 1px; background: var(--border); margin: 14px 0; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-brand">A1 Innovations <span>×</span> GoJunk LLC</div>
+  <div class="topbar-right">
+    <span class="slide-title-top" id="slideTitle">Welcome</span>
+    <span class="key-hint">← → to navigate</span>
+  </div>
+</header>
+
+<div class="nav">
+  <button class="nav-btn" id="prevBtn" onclick="goTo(current-1)" disabled>←</button>
+  <div class="nav-dots" id="navDots"></div>
+  <span class="nav-counter" id="counter">01 / 08</span>
+  <button class="nav-btn" id="nextBtn" onclick="goTo(current+1)">→</button>
+</div>
+
+<div class="deck">
+
+<!-- ═══════ SLIDE 1: WELCOME ═══════ -->
+<div class="slide active" data-title="Welcome">
+  <div style="position:absolute;top:-80px;right:-80px;width:400px;height:400px;background:radial-gradient(circle,rgba(34,197,94,0.08) 0%,transparent 70%);pointer-events:none;"></div>
+  <div style="position:absolute;bottom:-60px;left:-60px;width:300px;height:300px;background:radial-gradient(circle,rgba(34,197,94,0.05) 0%,transparent 70%);pointer-events:none;"></div>
+  <div style="text-align:center;position:relative;z-index:1;">
+    <span class="eyebrow">A1 Innovations — Confidential Preview</span>
+    <div class="display">
+      <span class="stroke">Go</span><span class="green">Junk</span><br>
+      <span style="font-size:clamp(20px,2.8vw,38px);font-weight:600;letter-spacing:2px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;">MEETS</span><br>
+      AI <span class="green">Automation.</span>
+    </div>
+    <div class="accent-bar center"></div>
+    <p class="subtext" style="margin-bottom:24px;">A look at how intelligent automation can help GoJunk answer faster, book more jobs, follow up smarter, and turn one-time customers into repeat revenue — across all 45+ cities.</p>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <span class="pill pill-green">⚡ Central Florida</span>
+      <span class="pill pill-white">45+ Cities Served</span>
+      <span class="pill pill-dark">Same-Day Service</span>
+      <span class="pill pill-green">Locally Owned</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ SLIDE 2: OPPORTUNITY ═══════ -->
+<div class="slide" data-title="The Opportunity">
+  <div style="position:absolute;top:-60px;left:-60px;width:350px;height:350px;background:radial-gradient(circle,rgba(34,197,94,0.06) 0%,transparent 70%);pointer-events:none;"></div>
+  <div class="slide-inner" style="position:relative;z-index:1;">
+    <span class="eyebrow">The Bigger Picture</span>
+    <div class="heading" style="margin-bottom:6px;">What happens when your<br><span class="green">business runs itself</span> between jobs.</div>
+    <div class="accent-bar"></div>
+    <div class="g2" style="align-items:start;margin-top:6px;">
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="card">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--green);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">The shift happening right now</div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.65;">The junk removal companies scaling fastest right now aren't just the ones with the biggest trucks — they're the ones that respond first, follow up automatically, and never let a lead go cold. Speed-to-response is the single biggest competitive advantage in this industry.</p>
+        </div>
+        <div class="card card-green">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--green);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">What this looks like for GoJunk</div>
+          <p style="font-size:13px;color:rgba(245,245,245,0.8);line-height:1.65;">GoJunk already has the brand, the coverage, and the reputation. The opportunity is to add an intelligent layer underneath everything that's already working — so every call gets answered, every lead gets followed up, and every completed job turns into a review and a repeat customer.</p>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="g2" style="max-width:100%;gap:10px;">
+          <div class="card stat"><div class="stat-num">2x</div><div class="stat-label">More bookings with instant lead response</div></div>
+          <div class="card stat"><div class="stat-num">24/7</div><div class="stat-label">Coverage with zero extra labor cost</div></div>
+          <div class="card stat"><div class="stat-num">60s</div><div class="stat-label">Lead response vs. hours manually</div></div>
+          <div class="card stat"><div class="stat-num">40%</div><div class="stat-label">Of leads go to whoever responds first</div></div>
+        </div>
+        <div class="card" style="border-left:3px solid var(--green);border-radius:0 8px 8px 0;">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--green);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;">The GoJunk advantage</div>
+          <p style="font-size:12px;color:var(--muted);line-height:1.6;">You're already operating in 45+ cities with same-day service. Adding AI automation means every single incoming opportunity — whether it's 6am, Sunday night, or peak storm season — gets captured and converted without a single extra hire.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ SLIDE 3: INTELLIGENT CLIENT NURTURE SYSTEM ═══════ -->
+<div class="slide" data-title="Intelligent Client Nurture System" data-animate="bubbles" style="justify-content:flex-start;padding-top:62px;padding-bottom:44px;">
+  <div class="slide-inner" style="position:relative;z-index:1;">
+    <span class="eyebrow">System 01 — Customer Communication</span>
+    <div class="heading" style="font-size:clamp(20px,2.6vw,36px);margin-bottom:4px;">Intelligent Client <span class="green">Nurture System</span></div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px;max-width:700px;line-height:1.6;">One automated SMS & email agent managing every customer touchpoint — from the first inquiry to the fifth job. Runs 24/7. Zero manual effort after setup.</p>
+    <div class="g2" style="align-items:start;gap:14px;">
+      <!-- Left: 3x3 grid of components -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+        <div class="card" style="padding:12px;border-top:2px solid var(--green);">
+          <div style="font-size:18px;margin-bottom:6px;">✅</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;color:var(--white);margin-bottom:3px;">Job Confirmation</div>
+          <p style="font-size:10px;color:var(--muted);line-height:1.5;">Auto confirmation + pre-pickup reminder sent after every booking.</p>
+        </div>
+        <div class="card" style="padding:12px;border-top:2px solid var(--green);">
+          <div style="font-size:18px;margin-bottom:6px;">💬</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;color:var(--white);margin-bottom:3px;">Post-Job Check-In</div>
+          <p style="font-size:10px;color:var(--muted);line-height:1.5;">Satisfaction follow-up after every completed job. Surfaces issues before bad reviews.</p>
+        </div>
+        <div class="card" style="padding:12px;border-top:2px solid var(--green);">
+          <div style="font-size:18px;margin-bottom:6px;">⭐</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;color:var(--white);margin-bottom:3px;">Google Review Bot</div>
+          <p style="font-size:10px;color:var(--muted);line-height:1.5;">Auto-triggered review request after every completed job at peak satisfaction.</p>
+        </div>
+        <div class="card" style="padding:12px;border-top:2px solid rgba(34,197,94,0.4);">
+          <div style="font-size:18px;margin-bottom:6px;">🔁</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;color:var(--white);margin-bottom:3px;">Repeat Re-Engagement</div>
+          <p style="font-size:10px;color:var(--muted);line-height:1.5;">"Ready for another cleanout?" — auto re-engagement for past customers.</p>
+        </div>
+        <div class="card" style="padding:12px;border-top:2px solid rgba(34,197,94,0.4);">
+          <div style="font-size:18px;margin-bottom:6px;">⚡</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;color:var(--white);margin-bottom:3px;">Instant Lead Response</div>
+          <p style="font-size:10px;color:var(--muted);line-height:1.5;">Web inquiry or text → personalized reply in under 60 seconds, 24/7.</p>
+        </div>
+        <div class="card" style="padding:12px;border-top:2px solid rgba(34,197,94,0.4);">
+          <div style="font-size:18px;margin-bottom:6px;">👥</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;color:var(--white);margin-bottom:3px;">Referral Sequence</div>
+          <p style="font-size:10px;color:var(--muted);line-height:1.5;">After a great job, a referral request goes out automatically. Word of mouth on autopilot.</p>
+        </div>
+        <div class="card" style="padding:12px;border-top:2px solid var(--border);">
+          <div style="font-size:18px;margin-bottom:6px;">🌩️</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;color:var(--white);margin-bottom:3px;">Seasonal Campaigns</div>
+          <p style="font-size:10px;color:var(--muted);line-height:1.5;">Storm debris, spring cleaning, moving season — broadcast campaigns to your customer list.</p>
+        </div>
+        <div class="card" style="padding:12px;border-top:2px solid var(--border);">
+          <div style="font-size:18px;margin-bottom:6px;">🏢</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;color:var(--white);margin-bottom:3px;">Commercial Follow-Up</div>
+          <p style="font-size:10px;color:var(--muted);line-height:1.5;">Property managers and contractors get a dedicated re-booking sequence.</p>
+        </div>
+        <div class="card" style="padding:12px;border-top:2px solid var(--border);">
+          <div style="font-size:18px;margin-bottom:6px;">💤</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;color:var(--white);margin-bottom:3px;">Win-Back Sequence</div>
+          <p style="font-size:10px;color:var(--muted);line-height:1.5;">Customers quiet for 60-90 days get a warm win-back before they go elsewhere.</p>
+        </div>
+      </div>
+      <!-- Right: SMS preview -->
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="background:var(--dark2);border:1px solid var(--border);border-radius:12px;padding:14px;">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;text-align:center;">// Live Message Examples</div>
+          <div style="display:flex;flex-direction:column;gap:8px;" id="bubbleWrap">
+            <div class="bubble-label" id="bl1">POST-JOB — GOOGLE REVIEW</div>
+            <div class="bubble bubble-out" id="b1">Hey Mike! GoJunk here — just checking in. How'd everything look after the garage cleanout today? Hope the space is looking great! 💪</div>
+            <div class="bubble bubble-in" id="b2">Looks amazing! You guys were super fast. Really impressed.</div>
+            <div class="bubble bubble-out" id="b3">That's what we like to hear! 🙌 Mind dropping us a quick Google review? Takes 30 seconds and helps us out big time → [link]</div>
+            <div style="height:6px;"></div>
+            <div class="bubble-label" id="bl2">INSTANT LEAD RESPONSE — 47 SECONDS</div>
+            <div class="bubble bubble-in" id="b4">"Hi I need a couch and old fridge picked up in Brandon, FL"</div>
+            <div class="bubble bubble-out" id="b5">Hey! GoJunk here 👋 We serve Brandon and can likely get to you same-day. Can you shoot us a quick photo of both items? We'll get you a price in minutes! 📸</div>
+            <div style="height:6px;"></div>
+            <div class="bubble-label" id="bl3">WIN-BACK — 75 DAYS SINCE LAST JOB</div>
+            <div class="bubble bubble-out" id="b6">Hey Sandra! It's been a while — GoJunk here. Got another space that needs clearing? We're still serving Winter Haven with same-day pickup. Get a free quote → [link] 🚛</div>
+          </div>
+        </div>
+        <div class="card card-green" style="padding:12px 14px;">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--green);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;">9 touchpoints. One system.</div>
+          <p style="font-size:11px;color:rgba(245,245,245,0.7);line-height:1.55;">Every customer, every stage of their journey — handled automatically. One setup. Runs forever.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ SLIDE 4: 24/7 VOICE AGENT ═══════ -->
+<div class="slide" data-title="24/7 AI Voice Agent" data-animate="callflow" style="justify-content:flex-start;padding-top:62px;padding-bottom:44px;">
+  <div style="position:absolute;top:-60px;right:-60px;width:350px;height:350px;background:radial-gradient(circle,rgba(34,197,94,0.07) 0%,transparent 70%);pointer-events:none;"></div>
+  <div class="slide-inner" style="position:relative;z-index:1;">
+    <span class="eyebrow">System 02 — Always Answering</span>
+    <div class="heading" style="font-size:clamp(20px,2.6vw,36px);margin-bottom:4px;">24/7 AI <span class="green">Voice Agent</span></div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px;max-width:700px;line-height:1.6;">Every call answered in under 2 seconds. Every job quoted. Every booking confirmed. Before hours, after hours, peak season — the phone never rings out at GoJunk again.</p>
+    <div class="g2" style="align-items:start;gap:14px;">
+      <div style="display:flex;flex-direction:column;gap:0;">
+        <div class="flow" style="padding:10px 0;">
+          <div class="flow-num">01</div>
+          <div><h4 style="font-size:14px;">Answers Every Call Instantly</h4><p style="font-size:11px;">Picks up in under 2 seconds — before hours, after hours, weekends, storm surge days. No voicemail. No missed job. Ever.</p></div>
+        </div>
+        <div class="flow" style="padding:10px 0;">
+          <div class="flow-num">02</div>
+          <div><h4 style="font-size:14px;">Quotes on Volume — Just Like You Do</h4><p style="font-size:11px;">Asks the right questions (what, how much, where), gives an accurate price range on the call. Sounds natural, professional, on-brand.</p></div>
+        </div>
+        <div class="flow" style="padding:10px 0;">
+          <div class="flow-num">03</div>
+          <div><h4 style="font-size:14px;">Books the Job Into Your Calendar</h4><p style="font-size:11px;">Customer picks a time slot. Confirmed in real time. Your crew wakes up to a booked schedule — no callbacks, no back-and-forth.</p></div>
+        </div>
+        <div class="flow" style="padding:10px 0;">
+          <div class="flow-num">04</div>
+          <div><h4 style="font-size:14px;">Dispatcher Notification — Instant</h4><p style="font-size:11px;">The moment a job is booked, your dispatcher gets an automatic SMS with job details — customer name, address, service type, time. Zero manual handoff. Your crew knows before they even check in.</p></div>
+        </div>
+        <div class="flow" style="padding:10px 0;border:none;">
+          <div class="flow-num">05</div>
+          <div><h4 style="font-size:14px;">Covers All 45+ Cities</h4><p style="font-size:11px;">Knows your full service area. If someone calls from Kissimmee at 9pm — it answers, quotes, and books. No city left uncovered.</p></div>
+        </div>
+        <div style="background:var(--dark2);border:1px solid var(--green-border);border-radius:8px;padding:12px 14px;margin-top:10px;border-left:3px solid var(--green);border-radius:0 8px 8px 0;">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--green);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;">Dispatcher notification — what it looks like</div>
+          <p style="font-size:11px;color:var(--muted);line-height:1.6;font-family:'DM Mono',monospace;">🚛 NEW JOB BOOKED<br>Customer: Carlos M. — (813) 401-2238<br>Location: 4421 Riverview Dr, Brandon FL<br>Job: Couch + fridge removal<br>Date: Tomorrow 10:00 AM<br>Status: Confirmed ✅</p>
+        </div>
+      </div>
+      <!-- Right: call flow animation -->
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="background:var(--dark2);border:1px solid var(--border);border-radius:12px;padding:16px;">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">// Incoming Call — GoJunk 24/7</div>
+          <div style="display:flex;flex-direction:column;gap:0;" id="callNodes">
+            <div class="cnode" id="cn1"><span class="cnode-dot"></span><div><div class="cnode-text">📞 Incoming call — any time, any city</div><div class="cnode-sub">Customer dials (863) 640-5477</div></div></div>
+            <div class="connector" id="cc1"></div>
+            <div class="cnode" id="cn2"><span class="cnode-dot"></span><div><div class="cnode-text">🤖 AI agent answers in &lt;2 seconds</div><div class="cnode-sub">Warm GoJunk greeting — sounds like your team</div></div></div>
+            <div class="connector" id="cc2"></div>
+            <div class="cnode" id="cn3"><span class="cnode-dot"></span><div><div class="cnode-text">📦 Collects job details</div><div class="cnode-sub">What needs hauling, volume, location</div></div></div>
+            <div class="connector" id="cc3"></div>
+            <div class="cnode" id="cn4"><span class="cnode-dot"></span><div><div class="cnode-text">💰 Delivers upfront price range</div><div class="cnode-sub">Volume-based quote — just like you do it</div></div></div>
+            <div class="connector" id="cc4"></div>
+            <div class="cnode" id="cn5"><span class="cnode-dot"></span><div><div class="cnode-text">📅 Job booked + calendar confirmed</div><div class="cnode-sub">Customer gets SMS confirmation instantly</div></div></div>
+            <div class="connector" id="cc5"></div>
+            <div class="cnode" id="cn6"><span class="cnode-dot"></span><div><div class="cnode-text">📲 Dispatcher notified automatically</div><div class="cnode-sub">Full job details sent to your crew — zero manual handoff</div></div></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+          <div class="card stat" style="padding:12px;"><div class="stat-num" style="font-size:28px;">0</div><div class="stat-label">Missed calls</div></div>
+          <div class="card stat" style="padding:12px;"><div class="stat-num" style="font-size:28px;">24/7</div><div class="stat-label">Coverage</div></div>
+          <div class="card stat" style="padding:12px;"><div class="stat-num" style="font-size:28px;">Auto</div><div class="stat-label">Dispatch notify</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ SLIDE 5: TEXT-TO-QUOTE AI ═══════ -->
+<div class="slide" data-title="Text-to-Quote AI" data-animate="textquote" style="justify-content:flex-start;padding-top:62px;padding-bottom:44px;">
+  <div style="position:absolute;bottom:-60px;left:-60px;width:350px;height:350px;background:radial-gradient(circle,rgba(34,197,94,0.06) 0%,transparent 70%);pointer-events:none;"></div>
+  <div class="slide-inner" style="position:relative;z-index:1;">
+    <span class="eyebrow">System 03 — Instant Quoting</span>
+    <div class="heading" style="font-size:clamp(20px,2.6vw,36px);margin-bottom:4px;">Text-to-Quote <span class="green">AI</span></div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px;max-width:700px;line-height:1.6;">GoJunk already tells customers to "Text Us Photos for a Quote." Right now someone has to look at that photo and manually reply. This system does that automatically — customer texts a photo, AI analyzes it, price goes back in seconds. No human needed.</p>
+    <div class="g2" style="align-items:start;gap:14px;">
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="flow" style="padding:10px 0;">
+          <div class="flow-num">01</div>
+          <div><h4 style="font-size:14px;">Customer Texts a Photo</h4><p style="font-size:11px;">They see "Text Us Photos for a Quote" on your site — they snap a pic and send it. Same behavior they already do today.</p></div>
+        </div>
+        <div class="flow" style="padding:10px 0;">
+          <div class="flow-num">02</div>
+          <div><h4 style="font-size:14px;">AI Analyzes the Image</h4><p style="font-size:11px;">Computer vision reads the photo — identifies item types, estimates volume, factors in location. No human eyes needed.</p></div>
+        </div>
+        <div class="flow" style="padding:10px 0;">
+          <div class="flow-num">03</div>
+          <div><h4 style="font-size:14px;">Quote Sent Back in Seconds</h4><p style="font-size:11px;">An accurate price range texted back automatically — with a booking link. Customer goes from photo to booked in under 2 minutes.</p></div>
+        </div>
+        <div class="flow" style="padding:10px 0;">
+          <div class="flow-num">04</div>
+          <div><h4 style="font-size:14px;">Works Around the Clock</h4><p style="font-size:11px;">Customer texts at 11pm on a Sunday — they get a quote instantly. Right now that inquiry sits unanswered until Monday morning.</p></div>
+        </div>
+        <div class="flow" style="padding:10px 0;border:none;">
+          <div class="flow-num">05</div>
+          <div><h4 style="font-size:14px;">Converts More Quotes to Jobs</h4><p style="font-size:11px;">If they don't book immediately, the Estimate Follow-Up Bot fires automatically 2-4 hours later — capturing jobs that would otherwise go to a competitor.</p></div>
+        </div>
+      </div>
+      <!-- Right: text quote demo -->
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="background:var(--dark2);border:1px solid var(--border);border-radius:12px;padding:14px;">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;text-align:center;">// Text-to-Quote — Live Demo</div>
+          <div style="display:flex;flex-direction:column;gap:8px;" id="tqWrap">
+            <div class="bubble-label" id="tql1">CUSTOMER TEXTS PHOTO</div>
+            <div class="bubble bubble-in" id="tq1">
+              <div style="background:var(--dark3);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:6px;text-align:center;">
+                <div style="font-size:24px;margin-bottom:4px;">📸</div>
+                <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);">IMG_4821.jpg — Couch + dresser + misc boxes</div>
+              </div>
+              "Hey, need this stuff hauled from my garage in Tampa"
+            </div>
+            <div class="bubble-label" id="tql2">AI RESPONSE — 18 SECONDS LATER</div>
+            <div class="bubble bubble-out" id="tq2">Got it! 👋 Based on your photo — looks like 1 couch, 1 dresser, and roughly 4-5 boxes of misc items. For Tampa that's typically in the <strong>$175–$250 range</strong> depending on weight. Want to lock in a same-day or next-day pickup? 📅</div>
+            <div class="bubble bubble-in" id="tq3">Yes! Can you do tomorrow morning?</div>
+            <div class="bubble bubble-out" id="tq4">Perfect — we've got 9am or 11am available tomorrow in your area. Which works better? 🚛</div>
+            <div class="bubble bubble-in" id="tq5">9am works!</div>
+            <div class="bubble bubble-out" id="tq6">✅ You're booked! 9am tomorrow — GoJunk will be at your address in Tampa. You'll get a reminder tonight. Thanks! 💪</div>
+          </div>
+        </div>
+        <div class="g2" style="max-width:100%;gap:8px;">
+          <div class="card" style="padding:12px;border-left:3px solid var(--green);border-radius:0 8px 8px 0;">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--green);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Without AI</div>
+            <p style="font-size:11px;color:var(--muted);line-height:1.5;">Someone manually checks the text, eyeballs the photo, types a reply — hours later, if at all. Lead probably called someone else.</p>
+          </div>
+          <div class="card card-green" style="padding:12px;">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--green);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">With AI</div>
+            <p style="font-size:11px;color:rgba(245,245,245,0.8);line-height:1.5;">Photo → quote → booking → confirmed. Under 2 minutes. Zero human involvement. Job in the calendar.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ SLIDE 6: ESTIMATE FOLLOW-UP BOT ═══════ -->
+<div class="slide" data-title="Estimate Follow-Up Bot">
+  <div style="position:absolute;top:-60px;right:-60px;width:350px;height:350px;background:radial-gradient(circle,rgba(34,197,94,0.06) 0%,transparent 70%);pointer-events:none;"></div>
+  <div class="slide-inner" style="position:relative;z-index:1;">
+    <span class="eyebrow">System 04 — Convert More Estimates</span>
+    <div class="heading" style="margin-bottom:6px;">The <span class="green">Estimate Follow-Up</span> Bot</div>
+    <div class="accent-bar"></div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:18px;max-width:680px;line-height:1.65;">Someone gets a quote and doesn't book. Right now that lead just disappears. This bot follows up automatically — at the exact right time — and captures the jobs that would otherwise go to whoever calls them next.</p>
+    <div class="g2" style="align-items:start;gap:14px;">
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="card" style="border-top:2px solid var(--green);">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--green);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">How it works</div>
+          <div class="flow" style="padding:8px 0;">
+            <div class="flow-num" style="font-size:10px;">01</div>
+            <div><h4 style="font-size:13px;">Quote Sent — No Booking</h4><p style="font-size:11px;">Customer got a price via text, web form, or voice agent but didn't confirm. Timer starts automatically.</p></div>
+          </div>
+          <div class="flow" style="padding:8px 0;">
+            <div class="flow-num" style="font-size:10px;">02</div>
+            <div><h4 style="font-size:13px;">Follow-Up Fires in 2–4 Hours</h4><p style="font-size:11px;">"Still thinking about it? We can get there same-day if you're ready." Short, direct, zero pressure.</p></div>
+          </div>
+          <div class="flow" style="padding:8px 0;">
+            <div class="flow-num" style="font-size:10px;">03</div>
+            <div><h4 style="font-size:13px;">Second Follow-Up Next Morning</h4><p style="font-size:11px;">If still no response — one final message the next morning. After that, the system respects the silence.</p></div>
+          </div>
+          <div class="flow" style="padding:8px 0;border:none;">
+            <div class="flow-num" style="font-size:10px;">04</div>
+            <div><h4 style="font-size:13px;">Booking Link Always Included</h4><p style="font-size:11px;">Every follow-up has a one-tap booking link. Friction removed. Decision is easy.</p></div>
+          </div>
+        </div>
+        <div class="card card-green" style="padding:14px 16px;">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--green);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;">The math on this</div>
+          <p style="font-size:12px;color:rgba(245,245,245,0.8);line-height:1.65;">If GoJunk sends 40 quotes a week and only 10% of the unbooked ones respond to a follow-up — that's 4 extra jobs a week at an average of $200 each. <strong style="color:var(--green);">$800/week in recovered revenue. $41,600/year.</strong> Fully automated.</p>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="background:var(--dark2);border:1px solid var(--border);border-radius:12px;padding:14px;">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">// Follow-Up Sequence — Real Example</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);letter-spacing:1px;">QUOTE SENT — 2:15 PM. NO RESPONSE.</div>
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);letter-spacing:1px;margin-top:4px;">FOLLOW-UP #1 — 5:45 PM (2.5 hrs later)</div>
+            <div class="bubble bubble-out" style="opacity:1;transform:none;font-size:11px;">Hey James! GoJunk here — just wanted to check in on that quote for the furniture removal in Lakeland. Still only $185 and we can still make today work if you're ready. Want to lock it in? 🚛</div>
+            <div class="bubble bubble-in" style="opacity:1;transform:none;font-size:11px;">Yeah actually let's do it! Can you come at 6?</div>
+            <div class="bubble bubble-out" style="opacity:1;transform:none;font-size:11px;">Done! ✅ We'll be there at 6pm. See you soon James — thanks for choosing GoJunk!</div>
+            <div style="background:var(--green-dim);border:1px solid var(--green-border);border-radius:6px;padding:8px 12px;margin-top:6px;font-family:'DM Mono',monospace;font-size:10px;color:var(--green);">JOB RECOVERED ✓ — $185 booked. Would have gone silent without the follow-up.</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div class="card stat" style="padding:12px;"><div class="stat-num" style="font-size:28px;">2–4hr</div><div class="stat-label">First follow-up</div></div>
+          <div class="card stat" style="padding:12px;"><div class="stat-num" style="font-size:28px;">Auto</div><div class="stat-label">Zero manual work</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ SLIDE 7: FULL SYSTEM OVERVIEW ═══════ -->
+<div class="slide" data-title="Full System Overview">
+  <div style="position:absolute;top:-80px;right:-80px;width:400px;height:400px;background:radial-gradient(circle,rgba(34,197,94,0.07) 0%,transparent 70%);pointer-events:none;"></div>
+  <div class="slide-inner" style="position:relative;z-index:1;text-align:center;">
+    <span class="eyebrow">Everything Connected</span>
+    <div class="display" style="font-size:clamp(28px,4vw,56px);margin-bottom:6px;">Four systems.<br><span class="green">One machine.</span></div>
+    <div class="accent-bar center"></div>
+    <p class="subtext" style="margin-bottom:20px;max-width:560px;">Each system works on its own — and multiplies when connected. A customer texts a photo, gets a quote, books the job, receives a confirmation, crew gets notified, job done, review requested, repeat booking triggered. All automatic.</p>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:100%;max-width:980px;text-align:left;margin-bottom:16px;">
+      <div class="card" style="border-top:3px solid var(--green);">
+        <div class="pill pill-green" style="margin-bottom:10px;font-size:9px;">System 01</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;text-transform:uppercase;margin-bottom:8px;">Intelligent Nurture System</div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <div class="check"><span class="check-mark">→</span>Job confirmation & reminders</div>
+          <div class="check"><span class="check-mark">→</span>Post-job check-in</div>
+          <div class="check"><span class="check-mark">→</span>Google review bot</div>
+          <div class="check"><span class="check-mark">→</span>Repeat re-engagement</div>
+          <div class="check"><span class="check-mark">→</span>Instant lead response</div>
+          <div class="check"><span class="check-mark">→</span>Referral sequence</div>
+          <div class="check"><span class="check-mark">→</span>Seasonal campaigns</div>
+          <div class="check"><span class="check-mark">→</span>Win-back sequence</div>
+        </div>
+      </div>
+      <div class="card" style="border-top:3px solid rgba(34,197,94,0.5);">
+        <div class="pill pill-green" style="margin-bottom:10px;font-size:9px;">System 02</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;text-transform:uppercase;margin-bottom:8px;">24/7 AI Voice Agent</div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <div class="check"><span class="check-mark">→</span>Answers every call &lt;2s</div>
+          <div class="check"><span class="check-mark">→</span>Volume-based quoting</div>
+          <div class="check"><span class="check-mark">→</span>Auto calendar booking</div>
+          <div class="check"><span class="check-mark">→</span>Dispatcher SMS notification</div>
+          <div class="check"><span class="check-mark">→</span>All 45+ cities covered</div>
+          <div class="check"><span class="check-mark">→</span>Before & after hours</div>
+        </div>
+      </div>
+      <div class="card" style="border-top:3px solid rgba(34,197,94,0.5);">
+        <div class="pill pill-green" style="margin-bottom:10px;font-size:9px;">System 03</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;text-transform:uppercase;margin-bottom:8px;">Text-to-Quote AI</div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <div class="check"><span class="check-mark">→</span>Photo → AI analysis</div>
+          <div class="check"><span class="check-mark">→</span>Instant price range texted back</div>
+          <div class="check"><span class="check-mark">→</span>Booking link included</div>
+          <div class="check"><span class="check-mark">→</span>Works 24/7</div>
+          <div class="check"><span class="check-mark">→</span>Zero human involvement</div>
+        </div>
+      </div>
+      <div class="card" style="border-top:3px solid rgba(34,197,94,0.5);">
+        <div class="pill pill-green" style="margin-bottom:10px;font-size:9px;">System 04</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;text-transform:uppercase;margin-bottom:8px;">Estimate Follow-Up Bot</div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <div class="check"><span class="check-mark">→</span>Fires 2-4hrs after quote</div>
+          <div class="check"><span class="check-mark">→</span>Second follow-up next morning</div>
+          <div class="check"><span class="check-mark">→</span>Booking link every time</div>
+          <div class="check"><span class="check-mark">→</span>Recovers cold leads</div>
+          <div class="check"><span class="check-mark">→</span>Fully automated</div>
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--dark2);border:1px solid var(--border);border-radius:8px;padding:12px 20px;display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;">
+      <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);">Lead comes in</span>
+      <span style="color:var(--green);font-weight:700;">→</span>
+      <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);">Instant response</span>
+      <span style="color:var(--green);font-weight:700;">→</span>
+      <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);">Quote delivered</span>
+      <span style="color:var(--green);font-weight:700;">→</span>
+      <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);">Job booked</span>
+      <span style="color:var(--green);font-weight:700;">→</span>
+      <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);">Crew notified</span>
+      <span style="color:var(--green);font-weight:700;">→</span>
+      <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);">Job done</span>
+      <span style="color:var(--green);font-weight:700;">→</span>
+      <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);">Review requested</span>
+      <span style="color:var(--green);font-weight:700;">→</span>
+      <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--green);font-weight:600;">Repeat booking triggered</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ SLIDE 8: CUSTOM CONSULTATION ═══════ -->
+<div class="slide" data-title="Let's Build Something Custom">
+  <div style="position:absolute;bottom:-80px;left:-60px;width:350px;height:350px;background:radial-gradient(circle,rgba(34,197,94,0.06) 0%,transparent 70%);pointer-events:none;"></div>
+  <div class="slide-inner" style="position:relative;z-index:1;">
+    <span class="eyebrow">The Right Way to Do This</span>
+    <div class="heading" style="margin-bottom:6px; max-width:660px;">Before anything gets built,<br><span class="green">we learn your operation.</span></div>
+    <div class="accent-bar"></div>
+    <div class="g2" style="align-items:start;gap:16px;margin-top:6px;">
+      <div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:14px;">GoJunk isn't a generic junk removal company — you're running same-day service across 45+ cities with real logistics behind it. The automation that works for a one-truck operation in a single city is not the same as what GoJunk needs.</p>
+        <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:16px;">Before a single system goes live, we sit down. I learn exactly how your dispatch works, how quotes are currently handled, what your crew's day looks like, and where the right automation actually adds value — not just where it sounds good on a slide deck.</p>
+        <div style="display:flex;flex-direction:column;gap:0;">
+          <div class="feat" style="padding:10px 0;">
+            <div class="feat-icon" style="font-size:16px;">🔍</div>
+            <div><h4 style="font-size:14px;">Operations Deep Dive</h4><p style="font-size:11px;">We map your current workflow — how calls come in, how jobs get dispatched, how follow-up is handled today — and find exactly where AI removes friction.</p></div>
+          </div>
+          <div class="feat" style="padding:10px 0;">
+            <div class="feat-icon" style="font-size:16px;">🛠</div>
+            <div><h4 style="font-size:14px;">Custom-Built for GoJunk</h4><p style="font-size:11px;">Every message, every flow, every automation is written for your brand, your cities, your service types. Not recycled from another client.</p></div>
+          </div>
+          <div class="feat" style="padding:10px 0;border:none;">
+            <div class="feat-icon" style="font-size:16px;">💡</div>
+            <div><h4 style="font-size:14px;">AI Expertise in Your Corner</h4><p style="font-size:11px;">I build these systems daily — which means I'll surface automation opportunities your competitors in Central Florida haven't thought of yet.</p></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="background:var(--dark2);border:1px solid var(--border);border-radius:12px;padding:18px;">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;">// What the discovery session covers</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div class="check"><span class="check-mark">✓</span>How calls and texts currently come in and get handled</div>
+            <div class="check"><span class="check-mark">✓</span>How dispatch and crew notification works today</div>
+            <div class="check"><span class="check-mark">✓</span>What your quote-to-booking conversion rate looks like</div>
+            <div class="check"><span class="check-mark">✓</span>Which cities and service types drive the most volume</div>
+            <div class="check"><span class="check-mark">✓</span>How repeat customers are currently managed</div>
+            <div class="check"><span class="check-mark">✓</span>Whether commercial clients (property managers, contractors) are a target</div>
+            <div class="check"><span class="check-mark">✓</span>What success looks like for GoJunk in 90 days</div>
+          </div>
+        </div>
+        <div style="background:var(--dark3);border:1px solid var(--green-border);border-radius:8px;padding:14px 16px;border-left:3px solid var(--green);border-radius:0 8px 8px 0;">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--green);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;">The goal</div>
+          <p style="font-size:12px;color:var(--muted);line-height:1.65;">Every automation that gets built should feel like it was made specifically for GoJunk — because it was. The discovery session is what makes that possible.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ SLIDE 9 (was 8): WHY A1 + CTA ═══════ -->
+<div class="slide" data-title="Let's Connect">
+  <div style="position:absolute;top:-80px;right:-80px;width:400px;height:400px;background:radial-gradient(circle,rgba(34,197,94,0.08) 0%,transparent 70%);pointer-events:none;"></div>
+  <div style="position:absolute;bottom:-60px;left:-60px;width:300px;height:300px;background:radial-gradient(circle,rgba(34,197,94,0.04) 0%,transparent 70%);pointer-events:none;"></div>
+  <div style="position:relative;z-index:1;text-align:center;max-width:780px;width:100%;">
+    <span class="eyebrow">The Next Step</span>
+    <div class="display" style="font-size:clamp(32px,5vw,64px);margin-bottom:8px;">Let's <span class="green">talk.</span></div>
+    <div class="accent-bar center"></div>
+    <p class="subtext" style="margin-bottom:24px;">No pressure. No pitch. Just a real conversation about GoJunk, where you're at, and whether there's a way A1 Innovations can help you capture more jobs and keep more customers — automatically.</p>
+    <div class="g2" style="text-align:left;margin-bottom:16px;gap:12px;max-width:780px;">
+      <div style="background:var(--dark2);border:1px solid var(--border);border-radius:10px;padding:20px 22px;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--green),transparent);"></div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">Your Contact</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;text-transform:uppercase;color:var(--white);margin-bottom:2px;">Mason Harold</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Founder, A1 Innovations — AI Automation Specialist</div>
+        <div style="display:flex;flex-direction:column;gap:7px;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--white);"><span style="color:var(--green);font-family:'DM Mono',monospace;">📱</span>(863) 370-0505</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--white);"><span style="color:var(--green);font-family:'DM Mono',monospace;">✉️</span>masona1harold@gmail.com</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--white);"><span style="color:var(--green);font-family:'DM Mono',monospace;">📍</span>Lakeland, FL — local to you</div>
+        </div>
+      </div>
+      <div style="background:var(--dark2);border:1px solid var(--border);border-radius:10px;padding:20px 22px;">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">What Happens Next</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="check" style="margin-bottom:0;"><div style="width:22px;height:22px;background:var(--green);border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;color:var(--black);flex-shrink:0;">1</div><div><strong style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;text-transform:uppercase;color:var(--white);">We connect</strong><p style="font-size:11px;color:var(--muted);margin-top:1px;">Quick call or meet in Lakeland — your schedule.</p></div></div>
+          <div class="check" style="margin-bottom:0;"><div style="width:22px;height:22px;background:var(--green);border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;color:var(--black);flex-shrink:0;">2</div><div><strong style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;text-transform:uppercase;color:var(--white);">I learn your operation</strong><p style="font-size:11px;color:var(--muted);margin-top:1px;">Deep discovery — workflow, dispatch, goals.</p></div></div>
+          <div class="check" style="margin-bottom:0;"><div style="width:22px;height:22px;background:var(--green);border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;color:var(--black);flex-shrink:0;">3</div><div><strong style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;text-transform:uppercase;color:var(--white);">Custom build</strong><p style="font-size:11px;color:var(--muted);margin-top:1px;">Tailored systems, live in under two weeks.</p></div></div>
+          <div class="check" style="margin-bottom:0;"><div style="width:22px;height:22px;background:var(--green);border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;color:var(--black);flex-shrink:0;">4</div><div><strong style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;text-transform:uppercase;color:var(--white);">More jobs. Less effort.</strong><p style="font-size:11px;color:var(--muted);margin-top:1px;">Revenue goes up. Workload doesn't.</p></div></div>
+        </div>
+      </div>
+    </div>
+    <p style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:2px;">GoJunk is already doing the right things. Let's make them automatic.</p>
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<script>
+let current = 0;
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+const counter = document.getElementById('counter');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const slideTitle = document.getElementById('slideTitle');
+const dotsContainer = document.getElementById('navDots');
+
+slides.forEach((_, i) => {
+  const dot = document.createElement('div');
+  dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+  dot.onclick = () => goTo(i);
+  dotsContainer.appendChild(dot);
+});
+
+function pad(n) { return n < 10 ? '0' + n : n; }
+
+function goTo(index) {
+  if (index < 0 || index >= total) return;
+  slides[current].classList.remove('active');
+  slides[current].classList.add('exit-left');
+  setTimeout(() => slides[current < index ? current : index + (index === current ? 0 : 0)].classList.remove('exit-left'), 450);
+  const prev = current;
+  current = index;
+  setTimeout(() => slides[prev].classList.remove('exit-left'), 450);
+  slides[current].classList.add('active');
+  counter.textContent = pad(current + 1) + ' / ' + pad(total);
+  prevBtn.disabled = current === 0;
+  nextBtn.disabled = current === total - 1;
+  slideTitle.textContent = slides[current].dataset.title || '';
+  document.querySelectorAll('.nav-dot').forEach((d, i) => d.classList.toggle('active', i === current));
+  const anim = slides[current].dataset.animate;
+  if (anim === 'bubbles') setTimeout(animateBubbles, 350);
+  if (anim === 'callflow') setTimeout(animateCallflow, 350);
+  if (anim === 'textquote') setTimeout(animateTextQuote, 350);
+}
+
+function animateBubbles() {
+  const ids = ['bl1','b1','b2','b3','bl2','b4','b5','bl3','b6'];
+  ids.forEach(id => { const el = document.getElementById(id); if(el) el.classList.remove('show'); });
+  ids.forEach((id, i) => { setTimeout(() => { const el = document.getElementById(id); if(el) el.classList.add('show'); }, i * 360); });
+}
+
+function animateCallflow() {
+  const nodes = ['cn1','cn2','cn3','cn4','cn5','cn6'];
+  const conns = ['cc1','cc2','cc3','cc4','cc5'];
+  [...nodes,...conns].forEach(id => { const el = document.getElementById(id); if(el){el.classList.remove('show','active','done');} });
+  nodes.forEach((id, i) => {
+    setTimeout(() => {
+      const el = document.getElementById(id); if(!el) return;
+      el.classList.add('show','active');
+      setTimeout(() => { el.classList.remove('active'); el.classList.add('done'); }, 500);
+      if(i < conns.length) setTimeout(() => { document.getElementById(conns[i])?.classList.add('show'); }, 200);
+    }, i * 420);
+  });
+}
+
+function animateTextQuote() {
+  const ids = ['tql1','tq1','tql2','tq2','tq3','tq4','tq5','tq6'];
+  ids.forEach(id => { const el = document.getElementById(id); if(el) el.classList.remove('show'); });
+  ids.forEach((id, i) => { setTimeout(() => { const el = document.getElementById(id); if(el) el.classList.add('show'); }, i * 400); });
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1);
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goTo(current - 1);
+});
+</script>
+</body>
+</html>
