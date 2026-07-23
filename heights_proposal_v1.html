@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Heights Salon & Spa — A1 Innovations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@300;400;500;600&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream:    #fdf8f3;
+  --cream2:   #f7f0e8;
+  --cream3:   #ede4d8;
+  --warm:     #1a1410;
+  --warm2:    #2c2218;
+  --warm3:    #3d3226;
+  --gold:     #c9a96e;
+  --gold2:    #b8945a;
+  --gold-pale:#f5eedd;
+  --rose:     #c4907a;
+  --rose-pale:#faeae4;
+  --sage:     #8a9e8c;
+  --sage-pale:#eaf0ea;
+  --text:     #1a1410;
+  --muted:    #7a6e62;
+  --muted2:   #a89e94;
+  --border:   rgba(26,20,16,0.1);
+  --border-gold: rgba(201,169,110,0.3);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+
+body {
+  background: var(--cream);
+  color: var(--text);
+  font-family: 'Jost', sans-serif;
+  height: 100vh;
+  overflow: hidden;
+}
+
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:0; opacity:0.5;
+}
+
+.deck { position:relative; width:100vw; height:100vh; z-index:1; }
+
+/* SLIDES */
+.slide {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  justify-content:center; align-items:center;
+  padding: 62px 76px 52px;
+  opacity:0; transform:translateY(24px);
+  transition: opacity 0.55s cubic-bezier(0.4,0,0.2,1), transform 0.55s cubic-bezier(0.4,0,0.2,1);
+  pointer-events:none; overflow:hidden;
+}
+.slide.active { opacity:1; transform:translateY(0); pointer-events:all; }
+.slide.exit-up { opacity:0; transform:translateY(-24px); }
+
+/* NAV */
+.nav {
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+  display:flex; align-items:center; gap:18px; z-index:200;
+  background:rgba(253,248,243,0.94); border:1px solid var(--border);
+  border-radius:100px; padding:9px 22px; backdrop-filter:blur(12px);
+  box-shadow: 0 4px 20px rgba(26,20,16,0.07);
+}
+.nav-btn {
+  background:none; border:none; color:var(--muted);
+  cursor:pointer; font-size:15px; padding:4px 10px;
+  border-radius:6px; transition:color 0.2s, background 0.2s;
+  font-family:'DM Mono',monospace;
+}
+.nav-btn:hover { color:var(--gold); background:var(--gold-pale); }
+.nav-btn:disabled { opacity:0.2; cursor:not-allowed; }
+.nav-counter { font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:2px; min-width:48px; text-align:center; }
+.nav-dots { display:flex; gap:5px; align-items:center; }
+.nav-dot { width:5px; height:5px; border-radius:50%; background:var(--muted2); opacity:0.3; transition:all 0.3s; cursor:pointer; }
+.nav-dot.active { background:var(--gold); opacity:1; width:16px; border-radius:3px; }
+
+/* TOPBAR */
+.topbar {
+  position:fixed; top:0; left:0; right:0; height:50px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 30px; z-index:200;
+  background:rgba(253,248,243,0.94); border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);
+}
+.topbar-brand { font-family:'Cormorant Garamond',serif; font-size:13px; font-weight:400; color:var(--muted); letter-spacing:3px; text-transform:uppercase; }
+.topbar-brand span { color:var(--gold); }
+.topbar-right { display:flex; align-items:center; gap:18px; }
+.slide-title-top { font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:1px; }
+.key-hint { font-family:'DM Mono',monospace; font-size:10px; color:var(--muted2); opacity:0.5; }
+
+/* TYPE */
+.eyebrow {
+  font-family:'DM Mono',monospace; font-size:10px;
+  letter-spacing:4px; text-transform:uppercase;
+  color:var(--gold); margin-bottom:10px; display:block;
+}
+.display {
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(36px,5vw,68px); font-weight:300; line-height:1.06;
+  color:var(--warm); margin-bottom:14px; text-align:center;
+}
+.display em { font-style:italic; color:var(--gold); }
+.heading {
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(22px,3vw,42px); font-weight:400; line-height:1.1;
+  color:var(--warm);
+}
+.heading em { font-style:italic; color:var(--gold); }
+.subtext { font-size:13px; color:var(--muted); line-height:1.75; max-width:520px; text-align:center; font-weight:300; }
+.body-sm { font-size:12px; color:var(--muted); line-height:1.7; font-weight:300; }
+
+/* DIVIDER */
+.divider-line { width:44px; height:1px; background:var(--gold); margin:0 auto 18px; }
+.divider-line.left { margin:0 0 18px; }
+
+/* ACCENT */
+.accent-orb {
+  position:absolute; border-radius:50%; pointer-events:none;
+  filter:blur(70px); opacity:0.18;
+}
+
+/* CARDS */
+.card {
+  background:#fff; border:1px solid var(--border);
+  border-radius:12px; padding:20px 22px; position:relative;
+}
+.card-gold { background:var(--gold-pale); border-color:var(--border-gold); }
+.card-rose { background:var(--rose-pale); border-color:rgba(196,144,122,0.25); }
+.card-sage { background:var(--sage-pale); border-color:rgba(138,158,140,0.25); }
+.card-cream { background:var(--cream2); border-color:var(--border); }
+
+/* PILLS */
+.pill {
+  display:inline-flex; align-items:center; gap:6px;
+  border-radius:100px; padding:4px 13px;
+  font-size:10px; font-family:'DM Mono',monospace; letter-spacing:1.5px; text-transform:uppercase;
+}
+.pill-gold { background:var(--gold-pale); color:var(--gold2); border:1px solid var(--border-gold); }
+.pill-rose { background:var(--rose-pale); color:var(--rose); border:1px solid rgba(196,144,122,0.3); }
+.pill-sage { background:var(--sage-pale); color:var(--sage); border:1px solid rgba(138,158,140,0.3); }
+.pill-dark { background:var(--warm); color:var(--cream); border:1px solid var(--warm); }
+
+/* CHECK */
+.chk { display:flex; align-items:flex-start; gap:9px; font-size:12px; color:var(--muted); margin-bottom:7px; line-height:1.55; font-weight:300; }
+.chk:last-child { margin-bottom:0; }
+.chk-mark { color:var(--gold); font-size:11px; margin-top:2px; flex-shrink:0; font-family:'DM Mono',monospace; }
+
+/* FEAT ROW */
+.feat { display:flex; align-items:flex-start; gap:13px; padding:11px 0; border-bottom:1px solid rgba(26,20,16,0.06); }
+.feat:last-child { border-bottom:none; }
+.feat-icon { width:34px; height:34px; border-radius:8px; flex-shrink:0; background:var(--gold-pale); display:flex; align-items:center; justify-content:center; font-size:15px; margin-top:1px; }
+.feat-icon.rose { background:var(--rose-pale); }
+.feat-icon.sage { background:var(--sage-pale); }
+.feat h4 { font-family:'Cormorant Garamond',serif; font-size:16px; font-weight:500; margin-bottom:2px; color:var(--warm); }
+.feat p { font-size:11px; color:var(--muted); line-height:1.55; font-weight:300; }
+
+/* FLOW */
+.flow { display:flex; align-items:flex-start; gap:13px; padding:9px 0; border-bottom:1px solid rgba(26,20,16,0.05); }
+.flow:last-child { border-bottom:none; }
+.flow-num { font-family:'DM Mono',monospace; font-size:10px; width:26px; height:26px; border-radius:50%; flex-shrink:0; border:1px solid var(--border-gold); color:var(--gold2); display:flex; align-items:center; justify-content:center; margin-top:1px; }
+.flow h4 { font-family:'Cormorant Garamond',serif; font-size:15px; font-weight:500; margin-bottom:2px; color:var(--warm); }
+.flow p { font-size:11px; color:var(--muted); line-height:1.55; font-weight:300; }
+
+/* GRIDS */
+.g2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; width:100%; max-width:980px; }
+.g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; width:100%; max-width:980px; }
+
+/* STAT */
+.stat-num { font-family:'Cormorant Garamond',serif; font-size:clamp(28px,3.5vw,46px); font-weight:300; color:var(--warm); line-height:1; }
+.stat-num em { font-style:italic; color:var(--gold); }
+.stat-label { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-top:4px; }
+
+/* STYLIST PILLS */
+.stylist-grid { display:flex; flex-wrap:wrap; gap:7px; }
+.stylist-tag {
+  display:inline-flex; align-items:center; gap:6px;
+  background:#fff; border:1px solid var(--border);
+  border-radius:100px; padding:5px 13px;
+  font-size:11px; color:var(--warm); font-weight:400;
+  transition: border-color 0.3s, background 0.3s, color 0.3s;
+}
+.stylist-tag.lit { background:var(--gold-pale); border-color:var(--border-gold); color:var(--gold2); }
+.stylist-tag .dot { width:6px; height:6px; border-radius:50%; background:var(--muted2); flex-shrink:0; transition:background 0.3s; }
+.stylist-tag.lit .dot { background:var(--gold); }
+
+/* BUBBLES */
+.bubble { padding:9px 13px; border-radius:12px; font-size:11px; line-height:1.6; max-width:90%; opacity:0; transform:translateY(6px); transition:opacity 0.38s ease, transform 0.38s ease; }
+.bubble.show { opacity:1; transform:translateY(0); }
+.bubble-out { background:var(--warm); color:var(--cream); border-radius:12px 12px 2px 12px; align-self:flex-end; }
+.bubble-in { background:#fff; color:var(--warm); border:1px solid var(--border); border-radius:12px 12px 12px 2px; }
+.b-label { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--muted2); margin-bottom:4px; opacity:0; transition:opacity 0.3s; }
+.b-label.show { opacity:1; }
+
+/* CALL NODES */
+.cnode { background:#fff; border:1px solid var(--border); border-radius:9px; padding:9px 13px; display:flex; align-items:center; gap:10px; opacity:0; transform:translateX(-8px); transition:opacity 0.4s ease, transform 0.4s ease, border-color 0.3s; width:100%; }
+.cnode.show { opacity:1; transform:translateX(0); }
+.cnode.active { border-color:var(--border-gold); background:var(--gold-pale); }
+.cnode.done { border-color:rgba(201,169,110,0.4); }
+.cnode-dot { width:7px; height:7px; border-radius:50%; background:var(--muted2); flex-shrink:0; transition:background 0.3s; }
+.cnode.active .cnode-dot, .cnode.done .cnode-dot { background:var(--gold); }
+.cnode-t { font-size:12px; color:var(--warm); }
+.cnode-s { font-size:10px; color:var(--muted); margin-top:1px; }
+.conn { width:1px; height:11px; background:var(--border-gold); margin:0 0 0 16px; opacity:0; transition:opacity 0.3s; }
+.conn.show { opacity:1; }
+
+/* WIDGET */
+.widget-bar { background:var(--warm); padding:11px 14px; display:flex; align-items:center; gap:9px; border-radius:12px 12px 0 0; }
+.widget-body { background:#fff; border:1px solid var(--border); border-top:none; border-radius:0 0 12px 12px; padding:13px; display:flex; flex-direction:column; gap:8px; }
+.widget-msg-bot { background:var(--cream2); border-radius:10px 10px 10px 2px; padding:8px 11px; font-size:11px; color:var(--warm); line-height:1.55; max-width:88%; }
+.widget-msg-user { background:var(--warm); border-radius:10px 10px 2px 10px; padding:8px 11px; font-size:11px; color:var(--cream); line-height:1.55; max-width:88%; align-self:flex-end; }
+.widget-input { border-top:1px solid var(--border); padding:10px 13px; display:flex; align-items:center; gap:8px; border-radius:0 0 12px 12px; }
+
+.slide-inner { width:100%; max-width:980px; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-brand">A1 Innovations <span>×</span> The Heights Salon & Spa</div>
+  <div class="topbar-right">
+    <span class="slide-title-top" id="slideTitle">Welcome</span>
+    <span class="key-hint">← → to navigate</span>
+  </div>
+</header>
+
+<div class="nav">
+  <button class="nav-btn" id="prevBtn" onclick="goTo(current-1)" disabled>←</button>
+  <div class="nav-dots" id="navDots"></div>
+  <span class="nav-counter" id="counter">01 / 09</span>
+  <button class="nav-btn" id="nextBtn" onclick="goTo(current+1)">→</button>
+</div>
+
+<div class="deck">
+
+<!-- ═══ SLIDE 1: WELCOME ═══ -->
+<div class="slide active" data-title="Welcome">
+  <div class="accent-orb" style="width:500px;height:500px;background:#c9a96e;top:-140px;right:-100px;"></div>
+  <div class="accent-orb" style="width:300px;height:300px;background:#c4907a;bottom:-80px;left:-60px;opacity:0.1;"></div>
+  <div style="text-align:center;position:relative;z-index:1;width:100%;max-width:820px;display:flex;flex-direction:column;align-items:center;">
+    <span class="eyebrow">A1 Innovations — For The Heights</span>
+    <div class="display">
+      The Heights leads<br>the charge — while<br><em>the world catches up.</em>
+    </div>
+    <div class="divider-line"></div>
+    <p class="subtext" style="margin-bottom:14px;max-width:620px;text-align:center;">Intelligent systems are coming to every industry — that's not a question, it's inevitable. This is what it looks like for The Heights to be ahead of it. Not reinventing the wheel. Just making sure every provider can walk in, do what they love, and never worry about a missed call, a lost booking, or a client who slipped through the cracks — ever again.</p>
+    <p style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;text-align:center;margin-bottom:20px;">Hannah — thank you for taking a moment. Here's the full picture.</p>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <span class="pill pill-gold">✦ Lakeland, FL · Est. 25+ Years</span>
+      <span class="pill pill-rose">Full Service Salon & Spa</span>
+      <span class="pill pill-sage">12 Independent Providers</span>
+      <span class="pill pill-dark">✦ A1 Innovations</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 2: OPPORTUNITY ═══ -->
+<div class="slide" data-title="The Opportunity">
+  <div class="accent-orb" style="width:380px;height:380px;background:#c9a96e;top:-100px;left:-80px;opacity:0.15;"></div>
+  <div class="slide-inner" style="position:relative;z-index:1;">
+    <span class="eyebrow">The Bigger Picture</span>
+    <div class="heading" style="margin-bottom:6px;">The Heights has something<br>most salons only dream about —<br><em>a loyal, established clientele.</em></div>
+    <div class="divider-line left"></div>
+    <div class="g2" style="align-items:start;margin-top:8px;">
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="card card-cream">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--gold2);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Where the opportunity lives</div>
+          <p class="body-sm">The Heights has been serving Lakeland for over 25 years and your providers are already mostly booked. That's a remarkable position to be in. The opportunity isn't to fix what's broken — it's to add an intelligent layer underneath everything that's working so that not a single client, booking, or rebooking opportunity ever slips through the cracks.</p>
+        </div>
+        <div class="card" style="border-color:var(--border-gold);">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--gold2);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">What this looks like in practice</div>
+          <p class="body-sm">Imagine every client of every provider at The Heights automatically getting a reminder before their appointment, a warm check-in after, a review request at the perfect moment, and a personal re-engagement message when they haven't been back in a while — all without a single person at The Heights lifting a finger to make it happen.</p>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="g2" style="max-width:100%;gap:10px;">
+          <div class="card" style="text-align:center;padding:16px 10px;">
+            <div class="stat-num"><em>0</em></div>
+            <div class="stat-label">Clients lost to silence</div>
+          </div>
+          <div class="card" style="text-align:center;padding:16px 10px;">
+            <div class="stat-num"><em>24/7</em></div>
+            <div class="stat-label">Booking coverage</div>
+          </div>
+          <div class="card" style="text-align:center;padding:16px 10px;">
+            <div class="stat-num"><em>60s</em></div>
+            <div class="stat-label">Lead response time</div>
+          </div>
+          <div class="card" style="text-align:center;padding:16px 10px;">
+            <div class="stat-num"><em>3×</em></div>
+            <div class="stat-label">Client retention lift</div>
+          </div>
+        </div>
+        <div class="card card-gold" style="padding:16px 18px;">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--gold2);letter-spacing:2px;text-transform:uppercase;margin-bottom:7px;">The Heights advantage</div>
+          <p class="body-sm" style="color:var(--warm3);">With 25+ years of client history, a loyal base, and 12 skilled independent providers — even a 10% improvement in rebooking rate and client retention compounds into significant revenue every single month, entirely on autopilot.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 3: INDEPENDENT MODEL ═══ -->
+<div class="slide" data-title="Built for Your Independent Model" data-animate="stylists">
+  <div class="accent-orb" style="width:350px;height:350px;background:#c4907a;bottom:-80px;right:-60px;opacity:0.15;"></div>
+  <div class="slide-inner" style="position:relative;z-index:1;">
+    <span class="eyebrow">The Key Difference</span>
+    <div class="heading" style="margin-bottom:4px;">This isn't built for<br><em>The Heights as a whole.</em><br>It's built for each provider individually.</div>
+    <div class="divider-line left"></div>
+    <div class="g2" style="align-items:start;gap:16px;margin-top:8px;">
+      <div>
+        <p class="body-sm" style="margin-bottom:14px;">Most automation tools treat a salon like one big entity. Every client gets the same generic message from "The Salon." That's not how The Heights works — and it's not how your clients experience it either.</p>
+        <p class="body-sm" style="margin-bottom:14px;">Christie's clients are Christie's clients. Hannah's clients are Hannah's. When a client books with Jonathan, they've built a relationship with Jonathan — not just with The Heights. The automations we build respect that completely.</p>
+        <div class="card card-gold" style="padding:14px 16px;margin-bottom:10px;">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--gold2);letter-spacing:2px;text-transform:uppercase;margin-bottom:7px;">What this means in practice</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div class="chk"><span class="chk-mark">✦</span>Christie's clients hear from Christie</div>
+            <div class="chk"><span class="chk-mark">✦</span>Hannah's clients hear from Hannah</div>
+            <div class="chk"><span class="chk-mark">✦</span>Every message is personalized to that provider-client relationship</div>
+            <div class="chk"><span class="chk-mark">✦</span>Each stylist's book stays full independently</div>
+            <div class="chk"><span class="chk-mark">✦</span>One system. 12 individual experiences.</div>
+          </div>
+        </div>
+        <div class="card card-rose" style="padding:12px 15px;">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--rose);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;">The result</div>
+          <p class="body-sm" style="color:var(--warm3);font-size:11px;">Every provider at The Heights gets the benefit of a personal AI system working for their individual client list — without any of them having to manage it themselves.</p>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="card" style="padding:16px 18px;">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">// The Heights — 12 Providers, One System</div>
+          <div class="stylist-grid" id="stylistGrid">
+            <div class="stylist-tag" id="st0"><span class="dot"></span>Hannah</div>
+            <div class="stylist-tag" id="st1"><span class="dot"></span>Jonathan</div>
+            <div class="stylist-tag" id="st2"><span class="dot"></span>Emily</div>
+            <div class="stylist-tag" id="st3"><span class="dot"></span>Michelle</div>
+            <div class="stylist-tag" id="st4"><span class="dot"></span>Christie</div>
+            <div class="stylist-tag" id="st5"><span class="dot"></span>Courtney</div>
+            <div class="stylist-tag" id="st6"><span class="dot"></span>Stacie</div>
+            <div class="stylist-tag" id="st7"><span class="dot"></span>Amy</div>
+            <div class="stylist-tag" id="st8"><span class="dot"></span>Shantel</div>
+            <div class="stylist-tag" id="st9"><span class="dot"></span>Lisa</div>
+            <div class="stylist-tag" id="st10"><span class="dot"></span>Tina</div>
+            <div class="stylist-tag" id="st11"><span class="dot"></span>Jane-O</div>
+          </div>
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);letter-spacing:1px;margin-bottom:8px;">Each provider gets their own:</div>
+            <div style="display:flex;flex-direction:column;gap:5px;">
+              <div class="chk" style="font-size:11px;"><span class="chk-mark">→</span>Personalized client message sequences</div>
+              <div class="chk" style="font-size:11px;"><span class="chk-mark">→</span>Individual rebooking follow-ups</div>
+              <div class="chk" style="font-size:11px;"><span class="chk-mark">→</span>Google review requests in their name</div>
+              <div class="chk" style="font-size:11px;"><span class="chk-mark">→</span>Lapsed client win-back sequences</div>
+            </div>
+          </div>
+        </div>
+        <div class="card card-cream" style="padding:12px 15px;">
+          <p style="font-family:'Cormorant Garamond',serif;font-size:17px;font-style:italic;font-weight:400;color:var(--warm);line-height:1.5;">"Christie has some openings this week — she'd love to see you again. Ready to get back in?"</p>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);letter-spacing:1px;margin-top:8px;text-transform:uppercase;">Example auto-message — Christie's lapsed client · 6 weeks silent</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 4: INTELLIGENT CLIENT NURTURE SYSTEM ═══ -->
+<div class="slide" data-title="Intelligent Client Nurture System" data-animate="bubbles" style="justify-content:flex-start;padding-top:62px;padding-bottom:44px;">
+  <div class="accent-orb" style="width:320px;height:320px;background:#c9a96e;bottom:-60px;right:-50px;opacity:0.12;"></div>
+  <div class="slide-inner" style="position:relative;z-index:1;">
+    <span class="eyebrow">System 01 — Client Relationships</span>
+    <div class="heading" style="font-size:clamp(18px,2.4vw,32px);margin-bottom:3px;">The <em>Intelligent Client</em> Nurture System</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px;font-weight:300;max-width:700px;line-height:1.65;">One unified SMS & email agent managing every client touchpoint across all 12 providers — from the moment they book to months after their last visit. Every message personalized. Everything automatic.</p>
+    <div class="g2" style="align-items:start;gap:14px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+        <div class="card" style="padding:11px 12px;border-top:2px solid var(--gold);">
+          <div style="font-size:16px;margin-bottom:5px;">✅</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:500;color:var(--warm);margin-bottom:3px;">Appointment Confirmation</div>
+          <p style="font-size:10px;color:var(--muted);line-height:1.5;font-weight:300;">Auto confirm + reminder 24-48hrs before every service. Reduces no-shows.</p>
+        </div>
+        <div class="card" style="padding:11px 12px;border-top:2px solid var(--gold);">
+          <div style="font-size:16px;margin-bottom:5px;">💬</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:500;color:var(--warm);margin-bottom:3px;">Post-Service Check-In</div>
+          <p style="font-size:10px;color:var(--muted);line-height:1.5;font-weight:300;">"How did you love your color with Hannah?" Sent a few hours after every visit.</p>
+        </div>
+        <div class="card" style="padding:11px 12px;border-top:2px solid var(--gold);">
+          <div style="font-size:16px;margin-bottom:5px;">⭐</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:500;color:var(--warm);margin-bottom:3px;">Google Review Request</div>
+          <p style="font-size:10px;color:var(--muted);line-height:1.5;font-weight:300;">Mentions the specific stylist by name. Builds individual reputations on autopilot.</p>
+        </div>
+        <div class="card card-gold" style="padding:11px 12px;border-top:2px solid rgba(201,169,110,0.4);">
+          <div style="font-size:16px;margin-bottom:5px;">🔁</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:500;color:var(--warm);margin-bottom:3px;">Per-Stylist Rebooking</div>
+          <p style="font-size:10px;color:var(--warm3);line-height:1.5;font-weight:300;">"Christie has openings this week" — fires 4-6 weeks after last visit. Each stylist's book stays full.</p>
+        </div>
+        <div class="card" style="padding:11px 12px;border-top:2px solid rgba(201,169,110,0.4);">
+          <div style="font-size:16px;margin-bottom:5px;">⚡</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:500;color:var(--warm);margin-bottom:3px;">New Client Intake</div>
+          <p style="font-size:10px;color:var(--muted);line-height:1.5;font-weight:300;">SMS intake form before first visit — hair type, goals, skin concerns. Provider walks in prepared.</p>
+        </div>
+        <div class="card" style="padding:11px 12px;border-top:2px solid rgba(201,169,110,0.4);">
+          <div style="font-size:16px;margin-bottom:5px;">🌿</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:500;color:var(--warm);margin-bottom:3px;">Aftercare Sequences</div>
+          <p style="font-size:10px;color:var(--muted);line-height:1.5;font-weight:300;">Color, keratin, lashes, facials — aftercare guide sent automatically. Fewer frantic calls.</p>
+        </div>
+        <div class="card card-rose" style="padding:11px 12px;border-top:2px solid rgba(196,144,122,0.4);">
+          <div style="font-size:16px;margin-bottom:5px;">🎂</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:500;color:var(--warm);margin-bottom:3px;">Birthday Campaign</div>
+          <p style="font-size:10px;color:var(--warm3);line-height:1.5;font-weight:300;">Personal birthday message + exclusive offer from their specific stylist. Feels human.</p>
+        </div>
+        <div class="card" style="padding:11px 12px;border-top:2px solid rgba(201,169,110,0.3);">
+          <div style="font-size:16px;margin-bottom:5px;">💤</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:500;color:var(--warm);margin-bottom:3px;">Lapsed Client Win-Back</div>
+          <p style="font-size:10px;color:var(--muted);line-height:1.5;font-weight:300;">"It's been a while — [Stylist] would love to see you again." 60-90 days quiet.</p>
+        </div>
+        <div class="card" style="padding:11px 12px;border-top:2px solid rgba(201,169,110,0.3);">
+          <div style="font-size:16px;margin-bottom:5px;">🔀</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:500;color:var(--warm);margin-bottom:3px;">New Client Routing</div>
+          <p style="font-size:10px;color:var(--muted);line-height:1.5;font-weight:300;">New inquiry → 2 quick questions → right provider recommended → booked. No confusion.</p>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:13px;padding:14px;">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;text-align:center;">// Message Examples — The Heights</div>
+          <div style="display:flex;flex-direction:column;gap:7px;" id="bubbleWrap">
+            <div class="b-label" id="bl1">POST-SERVICE — HANNAH'S CLIENT</div>
+            <div class="bubble bubble-out" id="b1">Hey Mona! Hannah here — just wanted to check in. How are you loving your new haircut? 🌸</div>
+            <div class="bubble bubble-in" id="b2">Honestly I feel like ME again! Thank you so much Hannah 😭❤️</div>
+            <div class="bubble bubble-out" id="b3">That makes my whole day! When you get a moment, would you mind sharing on Google? It means the world → [link] ✨</div>
+            <div style="height:5px;"></div>
+            <div class="b-label" id="bl2">REBOOKING — CHRISTIE'S CLIENT · 5 WEEKS</div>
+            <div class="bubble bubble-out" id="b4">Hey Sarah! Christie wanted me to reach out — it's been about 5 weeks and she has some openings this week if you're ready to come back in 💇‍♀️ Book here → [link]</div>
+            <div class="bubble bubble-in" id="b5">Oh perfect timing! Let me grab Thursday</div>
+            <div style="height:5px;"></div>
+            <div class="b-label" id="bl3">BIRTHDAY — JONATHAN'S CLIENT</div>
+            <div class="bubble bubble-out" id="b6">Happy Birthday Laura! 🎂 Jonathan and everyone at The Heights is thinking of you today. Treat yourself — your next visit is on us (special offer inside) 🥂</div>
+          </div>
+        </div>
+        <div class="card card-gold" style="padding:11px 14px;">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--gold2);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;">9 touchpoints. One system. 12 providers.</div>
+          <p style="font-size:11px;color:var(--warm3);line-height:1.55;font-weight:300;">Every client, every provider, every stage of the relationship — handled automatically with a personal touch that feels like it came straight from their stylist.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 5: 24/7 RECEPTIONIST THAT NEVER SLEEPS ═══ -->
+<div class="slide" data-title="The Receptionist That Never Sleeps" data-animate="callflow" style="justify-content:flex-start;padding-top:62px;padding-bottom:44px;">
+  <div class="accent-orb" style="width:350px;height:350px;background:#c9a96e;top:-80px;left:-70px;opacity:0.12;"></div>
+  <div class="slide-inner" style="position:relative;z-index:1;">
+    <span class="eyebrow">System 02 — Always Available</span>
+    <div class="heading" style="font-size:clamp(18px,2.4vw,32px);margin-bottom:4px;">The <em>Receptionist</em><br>That Never Sleeps</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;font-weight:300;max-width:740px;line-height:1.65;">This is not here to replace Misty or anyone at the front desk — full stop. This is a safety net that sits behind the team and makes sure that every single call, every single inquiry, and every single client is taken care of around the clock. Misty handles the in-person experience. This handles everything she can't physically reach at the same time.</p>
+    <div style="background:var(--rose-pale);border:1px solid rgba(196,144,122,0.3);border-left:3px solid var(--rose);border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:12px;max-width:740px;">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--rose);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">The front desk stays — this just makes it stronger</div>
+      <p style="font-size:11px;color:var(--warm3);line-height:1.55;font-weight:300;">Think of it like having a second receptionist available 24 hours a day, 7 days a week — one who never gets tired, never misses a call, and always knows exactly which provider is the best fit for each client walking through the door.</p>
+    </div>
+    <div class="g2" style="align-items:start;gap:14px;">
+      <div style="display:flex;flex-direction:column;gap:0;">
+        <div class="flow" style="padding:9px 0;">
+          <div class="flow-num">01</div>
+          <div><h4>Answers Every Call — Day or Night</h4><p>Before hours, after hours, during the Saturday rush when every line is ringing — it answers in under 2 seconds. Warm, professional, and on-brand for The Heights.</p></div>
+        </div>
+        <div class="flow" style="padding:9px 0;">
+          <div class="flow-num">02</div>
+          <div><h4>Asks the Right Questions</h4><p>What service are you looking for? Do you have a preferred provider? First visit? It gathers just enough to make a perfect match — fast.</p></div>
+        </div>
+        <div class="flow" style="padding:9px 0;">
+          <div class="flow-num">03</div>
+          <div><h4>Matches to the Right Provider — By Specialty</h4><p>This is where it gets powerful. The system knows every provider's skills — Hannah for lived-in color and balayage, Tina for massage and esthetics, Shantel for nails, Courtney for CBD facials. A client calling for lash extensions doesn't get sent to a hairstylist. They get sent to the right person, every time.</p></div>
+        </div>
+        <div class="flow" style="padding:9px 0;">
+          <div class="flow-num">04</div>
+          <div><h4>Books Directly Into Their Calendar</h4><p>Client picks a time, it's confirmed instantly into the right provider's schedule. No callback. No back-and-forth. Everyone's day just got easier.</p></div>
+        </div>
+        <div class="flow" style="padding:9px 0;border:none;">
+          <div class="flow-num">05</div>
+          <div><h4>Hands Off to the Team When Needed</h4><p>Anything that genuinely needs a human — a sensitive question, a specific situation — it takes a detailed message and flags it immediately for the right person. Nobody falls through the cracks.</p></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:13px;padding:15px;">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">// Incoming Call — The Heights · 8:47 PM</div>
+          <div id="callNodes" style="display:flex;flex-direction:column;gap:0;">
+            <div class="cnode" id="cn1"><span class="cnode-dot"></span><div><div class="cnode-t">📞 Call comes in — salon is closed</div><div class="cnode-s">Misty has gone home. Would have gone to voicemail.</div></div></div>
+            <div class="conn" id="cc1"></div>
+            <div class="cnode" id="cn2"><span class="cnode-dot"></span><div><div class="cnode-t">✨ Receptionist answers in &lt;2 seconds</div><div class="cnode-s">"Thank you for calling The Heights! How can I help you tonight?"</div></div></div>
+            <div class="conn" id="cc2"></div>
+            <div class="cnode" id="cn3"><span class="cnode-dot"></span><div><div class="cnode-t">💬 "I want a balayage — never had one before"</div><div class="cnode-s">Receptionist: "I know exactly who to connect you with."</div></div></div>
+            <div class="conn" id="cc3"></div>
+            <div class="cnode" id="cn4"><span class="cnode-dot"></span><div><div class="cnode-t">🎯 Matched to Hannah — balayage specialist</div><div class="cnode-s">Thursday 2 PM offered based on Hannah's live availability</div></div></div>
+            <div class="conn" id="cc4"></div>
+            <div class="cnode" id="cn5"><span class="cnode-dot"></span><div><div class="cnode-t">📅 Booked. Confirmed. Done.</div><div class="cnode-s">Client gets a text. Hannah sees it in the morning. Zero missed opportunity.</div></div></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+          <div class="card" style="text-align:center;padding:12px 8px;"><div class="stat-num" style="font-size:26px;"><em>0</em></div><div class="stat-label">Missed calls</div></div>
+          <div class="card" style="text-align:center;padding:12px 8px;"><div class="stat-num" style="font-size:26px;"><em>24/7</em></div><div class="stat-label">Available</div></div>
+          <div class="card card-gold" style="text-align:center;padding:12px 8px;"><div class="stat-num" style="font-size:26px;"><em>Right</em></div><div class="stat-label">Provider every time</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 6: WEBSITE CHAT WIDGET ═══ -->
+<div class="slide" data-title="AI Website Chat Widget">
+  <div class="accent-orb" style="width:350px;height:350px;background:#c4907a;bottom:-70px;left:-60px;opacity:0.13;"></div>
+  <div class="slide-inner" style="position:relative;z-index:1;">
+    <span class="eyebrow">System 03 — Always Visible</span>
+    <div class="heading" style="margin-bottom:6px;">The <em>AI Chat Widget</em><br>on theheightslkld.com</div>
+    <div class="divider-line left"></div>
+    <div class="g2" style="align-items:start;gap:16px;">
+      <div>
+        <p class="body-sm" style="margin-bottom:14px;">Right now, someone visiting theheightslkld.com after hours has no way to get a question answered or a booking made until the next business day. That's a client you almost had.</p>
+        <div class="feat">
+          <div class="feat-icon">💬</div>
+          <div><h4>Answers Every Question</h4><p>What's the difference between a relaxation facial and a corrective treatment? How long does a full color take? Who should I see for lashes? Answered instantly, 24/7.</p></div>
+        </div>
+        <div class="feat">
+          <div class="feat-icon rose">🎯</div>
+          <div><h4>Recommends the Right Provider</h4><p>Based on the service, the visitor's needs, and availability — the widget recommends the right stylist or tech and takes them straight to booking.</p></div>
+        </div>
+        <div class="feat">
+          <div class="feat-icon sage">📅</div>
+          <div><h4>Books the Appointment</h4><p>Visitor converts to booked client without ever making a phone call. From landing on the site to confirmed appointment in under 3 minutes.</p></div>
+        </div>
+        <div class="feat" style="border:none;">
+          <div class="feat-icon">🎨</div>
+          <div><h4>Looks Like The Heights</h4><p>Branded to your colors, your voice, your tone. Visitors experience The Heights — not a generic chatbot. One line of code added to your site.</p></div>
+        </div>
+      </div>
+      <!-- Widget mockup -->
+      <div>
+        <div style="border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(26,20,16,0.1);">
+          <div class="widget-bar">
+            <div style="width:30px;height:30px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;">✨</div>
+            <div>
+              <div style="font-family:'Cormorant Garamond',serif;font-size:13px;color:var(--cream);font-weight:400;">The Heights Salon & Spa</div>
+              <div style="font-family:'DM Mono',monospace;font-size:8px;color:rgba(253,248,243,0.5);letter-spacing:1px;">● Online now</div>
+            </div>
+          </div>
+          <div class="widget-body" style="min-height:200px;">
+            <div class="widget-msg-bot">Hi! I'm the Heights virtual assistant 🌸 I can answer questions about our services, help you find the right provider, or get you booked today!</div>
+            <div class="widget-msg-user">"I want highlights but I'm not sure who to book with"</div>
+            <div class="widget-msg-bot">I'd love to help! We have a few amazing colorists. Hannah is our co-founder and specializes in lived-in color and balayage. Emily is also incredible with highlights. Are you looking for a full balayage or more of a partial highlight?</div>
+            <div class="widget-msg-user">"Balayage — I've been wanting to try it"</div>
+            <div class="widget-msg-bot">Perfect! Hannah would be a beautiful fit for you 🌟 She has availability Thursday afternoon and Saturday morning. Which works better?</div>
+          </div>
+          <div class="widget-input" style="background:var(--cream2);">
+            <div style="flex:1;background:#fff;border-radius:20px;padding:7px 12px;font-size:10px;color:var(--muted);">Type a message...</div>
+            <div style="width:28px;height:28px;background:var(--warm);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--cream);font-size:11px;">→</div>
+          </div>
+        </div>
+        <div class="card card-gold" style="padding:11px 14px;margin-top:10px;">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--gold2);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;">One line of code</div>
+          <p style="font-size:11px;color:var(--warm3);line-height:1.55;font-weight:300;">Installs on your existing website in minutes. Branded entirely to The Heights. Works on any device, any time of day.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 7: FULL SYSTEM OVERVIEW ═══ -->
+<div class="slide" data-title="Full System Overview">
+  <div class="accent-orb" style="width:400px;height:400px;background:#c9a96e;top:-100px;right:-90px;opacity:0.13;"></div>
+  <div class="slide-inner" style="position:relative;z-index:1;text-align:center;">
+    <span class="eyebrow">Everything Connected</span>
+    <div class="display" style="font-size:clamp(26px,3.5vw,46px);margin-bottom:6px;">Three systems.<br><em>One seamless experience.</em></div>
+    <div class="divider-line"></div>
+    <p class="subtext" style="margin-bottom:20px;max-width:520px;">Each system works on its own and multiplies when connected. A client calls, gets routed to the right provider, books, receives a prep text, visits, gets aftercare guidance, leaves a review, gets re-engaged, and never leaves The Heights for good.</p>
+    <div class="g3" style="text-align:left;margin-bottom:16px;">
+      <div class="card" style="border-top:3px solid var(--gold);">
+        <div class="pill pill-gold" style="margin-bottom:10px;font-size:9px;">System 01</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:500;margin-bottom:8px;">Intelligent Client Nurture System</div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <div class="chk"><span class="chk-mark">→</span>Appointment confirmations & reminders</div>
+          <div class="chk"><span class="chk-mark">→</span>Post-service check-in</div>
+          <div class="chk"><span class="chk-mark">→</span>Google review (per stylist)</div>
+          <div class="chk"><span class="chk-mark">→</span>Per-stylist rebooking (4-6 wks)</div>
+          <div class="chk"><span class="chk-mark">→</span>New client intake form</div>
+          <div class="chk"><span class="chk-mark">→</span>Aftercare sequences</div>
+          <div class="chk"><span class="chk-mark">→</span>Birthday campaigns</div>
+          <div class="chk"><span class="chk-mark">→</span>Lapsed client win-back</div>
+          <div class="chk"><span class="chk-mark">→</span>New client routing</div>
+        </div>
+      </div>
+      <div class="card" style="border-top:3px solid var(--rose);">
+        <div class="pill pill-rose" style="margin-bottom:10px;font-size:9px;">System 02</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:500;margin-bottom:8px;">The Receptionist That Never Sleeps</div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <div class="chk"><span class="chk-mark">→</span>Answers every call under 2s</div>
+          <div class="chk"><span class="chk-mark">→</span>Before & after hours coverage</div>
+          <div class="chk"><span class="chk-mark">→</span>Matches client to right provider by specialty</div>
+          <div class="chk"><span class="chk-mark">→</span>Books into provider's calendar</div>
+          <div class="chk"><span class="chk-mark">→</span>Graceful escalation to staff</div>
+          <div class="chk"><span class="chk-mark">→</span>Safety net — Misty still leads</div>
+        </div>
+      </div>
+      <div class="card" style="border-top:3px solid var(--sage);">
+        <div class="pill pill-sage" style="margin-bottom:10px;font-size:9px;">System 03</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:500;margin-bottom:8px;">AI Website Chat Widget</div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <div class="chk"><span class="chk-mark">→</span>24/7 service Q&A on your site</div>
+          <div class="chk"><span class="chk-mark">→</span>Recommends the right provider</div>
+          <div class="chk"><span class="chk-mark">→</span>Visitor to booking conversion</div>
+          <div class="chk"><span class="chk-mark">→</span>Branded entirely to The Heights</div>
+          <div class="chk"><span class="chk-mark">→</span>One line of code to install</div>
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--cream2);border:1px solid var(--border);border-radius:8px;padding:11px 18px;display:inline-flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:center;">
+      <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);">Client discovers The Heights</span>
+      <span style="color:var(--gold);">→</span>
+      <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);">Chat or call answered</span>
+      <span style="color:var(--gold);">→</span>
+      <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);">Right provider booked</span>
+      <span style="color:var(--gold);">→</span>
+      <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);">Intake sent</span>
+      <span style="color:var(--gold);">→</span>
+      <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);">Visit + aftercare</span>
+      <span style="color:var(--gold);">→</span>
+      <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);">Review requested</span>
+      <span style="color:var(--gold);">→</span>
+      <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--gold2);font-weight:500;">Client for life</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 8: CUSTOM CONSULTATION ═══ -->
+<div class="slide" data-title="Let's Build This Together">
+  <div class="accent-orb" style="width:380px;height:380px;background:#c9a96e;bottom:-90px;left:-70px;opacity:0.12;"></div>
+  <div class="slide-inner" style="position:relative;z-index:1;">
+    <span class="eyebrow">The Right Approach</span>
+    <div class="heading" style="margin-bottom:6px;max-width:580px;">Before anything is built,<br>we sit down and learn <em>The Heights.</em></div>
+    <div class="divider-line left"></div>
+    <div class="g2" style="align-items:start;gap:18px;margin-top:6px;">
+      <div>
+        <p class="body-sm" style="margin-bottom:14px;">The Heights isn't a generic salon. You have 12 independent providers, each with their own client relationships, services, and styles. What works for one provider may not be the right fit for another — and the systems we build should reflect that completely.</p>
+        <p class="body-sm" style="margin-bottom:16px;">Before a single automation goes live, we have a real working session. Not a sales call — a discovery conversation where I learn how The Heights actually operates, what each provider's day looks like, and where AI genuinely helps without disrupting what already works beautifully.</p>
+        <div class="feat">
+          <div class="feat-icon">🔍</div>
+          <div><h4>Provider-by-Provider Discovery</h4><p>We walk through each independent provider's workflow — how they manage their clients today, what they wish they didn't have to handle, and where automation saves them real time and real money.</p></div>
+        </div>
+        <div class="feat">
+          <div class="feat-icon rose">🛠</div>
+          <div><h4>Custom Per-Provider Build</h4><p>Every message, every sequence, every trigger — built around each stylist's name, their service specialties, and their client relationships. Nothing generic. Everything specific to The Heights.</p></div>
+        </div>
+        <div class="feat" style="border:none;">
+          <div class="feat-icon sage">💡</div>
+          <div><h4>Ongoing AI Strategy</h4><p>As The Heights grows, the systems grow with you. New provider joins the team? They get onboarded into the system. New service added? The automations reflect it.</p></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:13px;padding:18px;">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;">// What we cover in the discovery session</div>
+          <div style="display:flex;flex-direction:column;gap:7px;">
+            <div class="chk"><span class="chk-mark">✦</span>How each provider manages their bookings today</div>
+            <div class="chk"><span class="chk-mark">✦</span>What booking platform The Heights currently uses</div>
+            <div class="chk"><span class="chk-mark">✦</span>Which services have the most rebooking potential</div>
+            <div class="chk"><span class="chk-mark">✦</span>How new clients currently find and choose a provider</div>
+            <div class="chk"><span class="chk-mark">✦</span>What aftercare is most needed per service type</div>
+            <div class="chk"><span class="chk-mark">✦</span>Which providers want more from their client list</div>
+            <div class="chk"><span class="chk-mark">✦</span>What success looks like for The Heights in 90 days</div>
+          </div>
+        </div>
+        <div class="card card-cream" style="padding:16px 18px;border-left:3px solid var(--gold);border-radius:0 10px 10px 0;">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:17px;font-style:italic;font-weight:400;color:var(--warm);line-height:1.5;margin-bottom:6px;">"The best automation is the kind that feels invisible — clients just notice that everything feels a little more personal."</div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;">— A1 Innovations</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 9: LET'S MEET ═══ -->
+<div class="slide" data-title="Let's Meet">
+  <div class="accent-orb" style="width:500px;height:500px;background:#c9a96e;top:-130px;right:-100px;"></div>
+  <div class="accent-orb" style="width:300px;height:300px;background:#c4907a;bottom:-80px;left:-60px;opacity:0.12;"></div>
+  <div style="position:relative;z-index:1;text-align:center;max-width:640px;width:100%;">
+    <span class="eyebrow">The Next Step</span>
+    <div class="display" style="font-size:clamp(30px,4vw,54px);">Let's meet<br><em>in person.</em></div>
+    <div class="divider-line"></div>
+    <p class="subtext" style="margin-bottom:26px;">No pitch. No pressure. Just a real conversation at The Heights — so I can see the space, meet the team, and learn exactly how we can build something that works for each and every one of your providers.</p>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:26px 30px;margin-bottom:18px;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--rose),var(--sage));"></div>
+      <div class="g2" style="gap:16px;text-align:left;max-width:100%;">
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">Your Contact</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:500;color:var(--warm);margin-bottom:2px;">Mason Harold</div>
+          <div style="font-size:11px;color:var(--muted);font-weight:300;margin-bottom:10px;">Founder, A1 Innovations<br>AI Automation Specialist</div>
+          <div style="display:flex;flex-direction:column;gap:7px;">
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--warm);">
+              <span style="color:var(--gold);">📱</span>(863) 370-0505
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);font-weight:300;">
+              <span style="color:var(--gold);">✉️</span>masona1harold@gmail.com
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);font-weight:300;">
+              <span style="color:var(--gold);">📍</span>Local to Lakeland — we're neighbors
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">One Simple Ask</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div class="chk" style="margin-bottom:0;"><div style="width:22px;height:22px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:13px;color:#fff;flex-shrink:0;">1</div><div><strong style="font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:500;color:var(--warm);">Call or text Mason</strong><p style="font-size:11px;color:var(--muted);font-weight:300;margin-top:1px;">(863) 370-0505 — anytime that works for you</p></div></div>
+            <div class="chk" style="margin-bottom:0;"><div style="width:22px;height:22px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:13px;color:#fff;flex-shrink:0;">2</div><div><strong style="font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:500;color:var(--warm);">We meet at The Heights</strong><p style="font-size:11px;color:var(--muted);font-weight:300;margin-top:1px;">30 minutes. I come to you. Your schedule, your space.</p></div></div>
+            <div class="chk" style="margin-bottom:0;"><div style="width:22px;height:22px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:13px;color:#fff;flex-shrink:0;">3</div><div><strong style="font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:500;color:var(--warm);">We see if it's a fit</strong><p style="font-size:11px;color:var(--muted);font-weight:300;margin-top:1px;">No commitment. If it makes sense for The Heights, we build it together.</p></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p style="font-family:'Cormorant Garamond',serif;font-size:17px;font-style:italic;color:var(--muted);font-weight:300;">The Heights has built something special over 25 years. I'd love to help protect and grow it.</p>
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<script>
+let current = 0;
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+const counter = document.getElementById('counter');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const slideTitle = document.getElementById('slideTitle');
+const dotsContainer = document.getElementById('navDots');
+
+slides.forEach((_,i) => {
+  const dot = document.createElement('div');
+  dot.className = 'nav-dot' + (i===0?' active':'');
+  dot.onclick = () => goTo(i);
+  dotsContainer.appendChild(dot);
+});
+
+function pad(n){ return n<10?'0'+n:n; }
+
+function goTo(index){
+  if(index<0||index>=total) return;
+  const prev = current;
+  slides[prev].classList.remove('active');
+  slides[prev].classList.add('exit-up');
+  setTimeout(()=>slides[prev].classList.remove('exit-up'),550);
+  current = index;
+  slides[current].classList.add('active');
+  counter.textContent = pad(current+1)+' / '+pad(total);
+  prevBtn.disabled = current===0;
+  nextBtn.disabled = current===total-1;
+  slideTitle.textContent = slides[current].dataset.title||'';
+  document.querySelectorAll('.nav-dot').forEach((d,i)=>d.classList.toggle('active',i===current));
+  const anim = slides[current].dataset.animate;
+  if(anim==='stylists') setTimeout(animateStylists, 350);
+  if(anim==='bubbles') setTimeout(animateBubbles, 350);
+  if(anim==='callflow') setTimeout(animateCallflow, 350);
+}
+
+/* STYLIST TAGS LIGHT UP */
+function animateStylists(){
+  for(let i=0;i<12;i++){
+    const el = document.getElementById('st'+i);
+    if(el) el.classList.remove('lit');
+  }
+  for(let i=0;i<12;i++){
+    setTimeout(()=>{
+      const el = document.getElementById('st'+i);
+      if(el) el.classList.add('lit');
+    }, i*140);
+  }
+}
+
+/* BUBBLE ANIMATION */
+function animateBubbles(){
+  const ids=['bl1','b1','b2','b3','bl2','b4','b5','bl3','b6'];
+  ids.forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('show'); });
+  ids.forEach((id,i)=>{ setTimeout(()=>{ const el=document.getElementById(id); if(el) el.classList.add('show'); }, i*360); });
+}
+
+/* CALL FLOW ANIMATION */
+function animateCallflow(){
+  const nodes=['cn1','cn2','cn3','cn4','cn5'];
+  const conns=['cc1','cc2','cc3','cc4'];
+  [...nodes,...conns].forEach(id=>{ const el=document.getElementById(id); if(el){el.classList.remove('show','active','done');} });
+  nodes.forEach((id,i)=>{
+    setTimeout(()=>{
+      const el=document.getElementById(id); if(!el) return;
+      el.classList.add('show','active');
+      setTimeout(()=>{ el.classList.remove('active'); el.classList.add('done'); },500);
+      if(i<conns.length) setTimeout(()=>{ document.getElementById(conns[i])?.classList.add('show'); },200);
+    }, i*440);
+  });
+}
+
+document.addEventListener('keydown', e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') goTo(current+1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp') goTo(current-1);
+});
+</script>
+</body>
+</html>
