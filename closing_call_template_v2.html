@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A1 Innovations — Solution Call</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-0: #07070d;
+    --bg-1: #0c0d18;
+    --panel: #12131f;
+    --edge: rgba(148,163,255,0.14);
+    --blue: #4f6bff;
+    --violet: #8b5cf6;
+    --cyan: #5eead4;
+    --gold: #fbbf24;
+    --red: #f87171;
+    --green: #34d399;
+    --text-hi: #f3f4fb;
+    --text-mid: #a9adc9;
+    --text-lo: #6b6f8f;
+    --mono: 'JetBrains Mono', monospace;
+    --disp: 'Space Grotesk', sans-serif;
+    --body: 'Inter', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; background: var(--bg-0); overflow: hidden; }
+  body { font-family: var(--body); color: var(--text-hi); position: relative; -webkit-font-smoothing: antialiased; }
+
+  /* ── AMBIENT BG ── */
+  .field { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+  .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.35; }
+  .orb1 { width: 520px; height: 520px; background: var(--blue); top: -120px; left: -100px; animation: drift1 22s ease-in-out infinite; }
+  .orb2 { width: 460px; height: 460px; background: var(--violet); bottom: -140px; right: -80px; animation: drift2 26s ease-in-out infinite; }
+  .orb3 { width: 300px; height: 300px; background: var(--cyan); top: 40%; left: 60%; opacity: 0.14; animation: drift3 30s ease-in-out infinite; }
+  @keyframes drift1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(60px,80px)} }
+  @keyframes drift2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-70px,-50px)} }
+  @keyframes drift3 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-40px,60px)} }
+  .grid-overlay {
+    position: absolute; inset: 0;
+    background-image: linear-gradient(var(--edge) 1px, transparent 1px), linear-gradient(90deg, var(--edge) 1px, transparent 1px);
+    background-size: 64px 64px; opacity: 0.35;
+    mask-image: radial-gradient(ellipse at 50% 40%, black 0%, transparent 75%);
+  }
+
+  /* ── DECK ── */
+  .deck { position: relative; z-index: 2; height: 100vh; width: 100vw; }
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 7vh 9vw;
+    opacity: 0; visibility: hidden;
+    transform: translateY(24px);
+    transition: opacity .6s ease, transform .6s ease, visibility .6s;
+  }
+  .slide.active { opacity: 1; visibility: visible; transform: translateY(0); }
+
+  /* ── TYPOGRAPHY ── */
+  .eyebrow {
+    font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--cyan); display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+    opacity: 0; animation: riseIn .6s ease forwards; animation-delay: .1s;
+  }
+  .eyebrow::before { content: ''; width: 26px; height: 1px; background: var(--cyan); display: inline-block; }
+  .eyebrow.violet { color: var(--violet); }
+  .eyebrow.violet::before { background: var(--violet); }
+  .eyebrow.gold { color: var(--gold); }
+  .eyebrow.gold::before { background: var(--gold); }
+  .eyebrow.green { color: var(--green); }
+  .eyebrow.green::before { background: var(--green); }
+  .eyebrow.red { color: var(--red); }
+  .eyebrow.red::before { background: var(--red); }
+
+  h1 {
+    font-family: var(--disp); font-weight: 700; line-height: 1.02; letter-spacing: -0.02em;
+    font-size: clamp(34px, 4.8vw, 68px);
+    background: linear-gradient(120deg, #ffffff 20%, #c9cdff 55%, #8b9cff 85%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    opacity: 0; animation: riseIn .7s ease forwards; animation-delay: .2s;
+    max-width: 22ch;
+  }
+  .sub-head {
+    font-family: var(--disp); font-weight: 600; font-size: clamp(16px, 1.8vw, 22px);
+    color: var(--text-mid); margin-top: 14px; max-width: 52ch; line-height: 1.4;
+    opacity: 0; animation: riseIn .7s ease forwards; animation-delay: .3s;
+  }
+  .lede {
+    font-size: 15px; color: var(--text-mid); max-width: 56ch; line-height: 1.7; margin-top: 16px;
+    opacity: 0; animation: riseIn .7s ease forwards; animation-delay: .38s;
+  }
+  @keyframes riseIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── STAGGER ── */
+  .stagger > * { opacity: 0; transform: translateY(16px); animation: riseIn .55s ease forwards; }
+  .stagger > *:nth-child(1) { animation-delay: .38s }
+  .stagger > *:nth-child(2) { animation-delay: .46s }
+  .stagger > *:nth-child(3) { animation-delay: .54s }
+  .stagger > *:nth-child(4) { animation-delay: .62s }
+  .stagger > *:nth-child(5) { animation-delay: .70s }
+  .stagger > *:nth-child(6) { animation-delay: .78s }
+
+  /* ── META CHIPS ── */
+  .meta-row {
+    display: flex; gap: 12px; flex-wrap: wrap; margin-top: 26px;
+    opacity: 0; animation: riseIn .6s ease forwards; animation-delay: .44s;
+  }
+  .chip {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .08em;
+    color: var(--text-mid); border: 1px solid var(--edge);
+    padding: 8px 16px; border-radius: 999px; background: rgba(255,255,255,0.02);
+  }
+  .chip b { color: var(--text-hi); }
+
+  /* ── CARDS ── */
+  .cards { display: grid; gap: 14px; }
+  .cards.g3 { grid-template-columns: repeat(3, 1fr); }
+  .cards.g2 { grid-template-columns: repeat(2, 1fr); }
+  .card {
+    background: linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+    border: 1px solid var(--edge); border-radius: 14px; padding: 20px 22px;
+    backdrop-filter: blur(6px); position: relative; overflow: hidden;
+  }
+  .card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(94,234,212,0.3), transparent);
+  }
+  .card.violet::before { background: linear-gradient(90deg, transparent, rgba(139,92,246,0.3), transparent); }
+  .card.gold::before { background: linear-gradient(90deg, transparent, rgba(251,191,36,0.3), transparent); }
+  .card.red::before { background: linear-gradient(90deg, transparent, rgba(248,113,113,0.3), transparent); }
+  .card.green::before { background: linear-gradient(90deg, transparent, rgba(52,211,153,0.3), transparent); }
+  .card.blue::before { background: linear-gradient(90deg, transparent, rgba(79,107,255,0.3), transparent); }
+
+  .card .tag {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--cyan); margin-bottom: 10px; display: block;
+  }
+  .card.violet .tag { color: var(--violet); }
+  .card.gold .tag { color: var(--gold); }
+  .card.red .tag { color: var(--red); }
+  .card.green .tag { color: var(--green); }
+  .card.blue .tag { color: var(--blue); }
+
+  .card h3 { font-family: var(--disp); font-size: 17px; font-weight: 600; color: var(--text-hi); margin-bottom: 6px; }
+  .card p { font-size: 13px; color: var(--text-mid); line-height: 1.6; }
+
+  /* ── DATA ROWS ── */
+  .data-rows { display: flex; flex-direction: column; gap: 0; }
+  .data-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 11px 0; border-bottom: 1px solid rgba(148,163,255,0.07);
+    font-size: 13.5px;
+  }
+  .data-row:last-child { border-bottom: none; }
+  .data-row .lbl { color: var(--text-lo); }
+  .data-row .val { font-family: var(--mono); font-size: 13px; color: var(--text-hi); }
+  .data-row .val.cyan { color: var(--cyan); }
+  .data-row .val.violet { color: var(--violet); }
+  .data-row .val.gold { color: var(--gold); }
+  .data-row .val.green { color: var(--green); }
+  .data-row .val.red { color: var(--red); }
+
+  /* ── PROBLEM LIST ── */
+  .prob-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+  .prob-list li {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 13.5px; color: var(--text-mid); line-height: 1.5;
+  }
+  .prob-list li .bullet { color: var(--red); margin-top: 2px; flex-shrink: 0; font-size: 12px; }
+  .prob-list.green li .bullet { color: var(--green); }
+
+  /* ── LOSS CALC ── */
+  .loss-box {
+    background: linear-gradient(160deg, rgba(248,113,113,0.06), rgba(139,92,246,0.04));
+    border: 1px solid rgba(248,113,113,0.18); border-radius: 14px;
+    padding: 22px 26px; margin-top: 20px; max-width: 700px;
+    opacity: 0; animation: riseIn .7s ease forwards; animation-delay: .48s;
+  }
+  .loss-box .loss-label {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--red); margin-bottom: 14px;
+  }
+  .loss-numbers { display: flex; gap: 32px; flex-wrap: wrap; }
+  .loss-num { }
+  .loss-num .amount {
+    font-family: var(--disp); font-size: 32px; font-weight: 700;
+    background: linear-gradient(120deg, #f87171, #c084fc);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    line-height: 1;
+  }
+  .loss-num .period { font-family: var(--mono); font-size: 11px; color: var(--text-lo); margin-top: 4px; letter-spacing: .08em; text-transform: uppercase; }
+
+  /* ── DELIVERABLES ── */
+  .deliv-list { list-style: none; display: flex; flex-direction: column; gap: 0; }
+  .deliv-item {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 14px 0; border-bottom: 1px solid rgba(148,163,255,0.07);
+  }
+  .deliv-item:last-child { border-bottom: none; }
+  .deliv-num {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
+    color: var(--cyan); background: rgba(94,234,212,0.08);
+    border: 1px solid rgba(94,234,212,0.18);
+    padding: 3px 10px; border-radius: 100px; white-space: nowrap; flex-shrink: 0; margin-top: 2px;
+  }
+  .deliv-body h4 { font-family: var(--disp); font-size: 15px; font-weight: 600; color: var(--text-hi); margin-bottom: 3px; }
+  .deliv-body p { font-size: 12.5px; color: var(--text-mid); line-height: 1.5; }
+
+  /* ── ROI METRICS ── */
+  .roi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-top: 20px; }
+  .roi-card {
+    background: linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+    border: 1px solid var(--edge); border-radius: 12px; padding: 18px 16px; text-align: center;
+  }
+  .roi-val { font-family: var(--disp); font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 6px; }
+  .roi-val.cyan { color: var(--cyan); }
+  .roi-val.green { color: var(--green); }
+  .roi-val.gold { color: var(--gold); }
+  .roi-val.violet { color: var(--violet); }
+  .roi-lbl { font-family: var(--mono); font-size: 10px; color: var(--text-lo); letter-spacing: .1em; text-transform: uppercase; }
+
+  /* ── TIMELINE ── */
+  .tl-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-top: 22px; position: relative; }
+  .tl-grid::before {
+    content: ''; position: absolute; top: 28px; left: 10%; right: 10%; height: 1px;
+    background: linear-gradient(90deg, var(--blue), var(--violet), var(--cyan));
+    opacity: 0.3; z-index: 0;
+  }
+  .tl-card {
+    background: linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+    border: 1px solid var(--edge); border-radius: 12px; padding: 18px 16px;
+    position: relative; z-index: 1; text-align: center;
+  }
+  .tl-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; border-radius: 12px 12px 0 0;
+  }
+  .tl-card.t1::before { background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+  .tl-card.t2::before { background: linear-gradient(90deg, var(--cyan), var(--violet)); }
+  .tl-card.t3::before { background: linear-gradient(90deg, var(--violet), var(--gold)); }
+  .tl-card.t4::before { background: linear-gradient(90deg, var(--gold), var(--green)); }
+  .tl-phase {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .tl-card.t1 .tl-phase { color: var(--blue); }
+  .tl-card.t2 .tl-phase { color: var(--cyan); }
+  .tl-card.t3 .tl-phase { color: var(--violet); }
+  .tl-card.t4 .tl-phase { color: var(--green); }
+  .tl-card h4 { font-family: var(--disp); font-size: 15px; font-weight: 600; color: var(--text-hi); margin-bottom: 6px; }
+  .tl-card p { font-size: 12px; color: var(--text-mid); line-height: 1.5; }
+  .tl-card .tl-timing {
+    margin-top: 10px; font-family: var(--mono); font-size: 11px; color: var(--text-lo);
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(148,163,255,0.08);
+    padding: 4px 10px; border-radius: 6px; display: inline-block;
+  }
+
+  /* ── INVESTMENT ── */
+  .invest-box {
+    background: linear-gradient(160deg, rgba(52,211,153,0.06), rgba(79,107,255,0.04));
+    border: 1px solid rgba(52,211,153,0.18); border-radius: 18px;
+    padding: 28px 32px; max-width: 680px;
+    opacity: 0; animation: riseIn .7s ease forwards; animation-delay: .3s;
+    position: relative; overflow: hidden;
+  }
+  .invest-box::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--green), var(--blue), var(--violet));
+  }
+  .invest-label {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--green); margin-bottom: 16px;
+  }
+  .invest-amount {
+    font-family: var(--disp); font-weight: 700; font-size: clamp(36px, 4vw, 56px); line-height: 1;
+    background: linear-gradient(120deg, var(--green), var(--cyan));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    margin-bottom: 6px;
+  }
+  .invest-type { font-family: var(--mono); font-size: 12px; color: var(--text-lo); margin-bottom: 20px; }
+  .invest-rows { border-top: 1px solid rgba(148,163,255,0.08); padding-top: 16px; }
+
+  /* ── PAYMENT BUTTON ── */
+  .pay-btn {
+    display: inline-flex; align-items: center; gap: 10px; margin-top: 20px;
+    font-family: var(--mono); font-size: 13px; letter-spacing: .08em;
+    color: var(--bg-0); background: linear-gradient(135deg, var(--green), var(--cyan));
+    padding: 14px 28px; border-radius: 10px; text-decoration: none;
+    font-weight: 600; cursor: pointer; border: none;
+    transition: opacity .2s, transform .2s;
+  }
+  .pay-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .pay-btn .arrow-r { font-size: 16px; }
+
+  /* ── CLOSE STEPS ── */
+  .close-steps { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; max-width: 620px; }
+  .close-step {
+    display: flex; align-items: flex-start; gap: 16px;
+    padding: 16px 20px;
+    background: linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+    border: 1px solid var(--edge); border-radius: 12px;
+    opacity: 0; animation: riseIn .6s ease forwards;
+  }
+  .close-step:nth-child(1) { animation-delay: .4s; }
+  .close-step:nth-child(2) { animation-delay: .52s; }
+  .close-step:nth-child(3) { animation-delay: .64s; }
+  .close-step .cs-icon {
+    width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+    background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.15);
+    display: flex; align-items: center; justify-content: center; font-size: 16px;
+  }
+  .close-step h4 { font-family: var(--disp); font-size: 15px; font-weight: 600; color: var(--text-hi); margin-bottom: 3px; }
+  .close-step p { font-size: 13px; color: var(--text-mid); line-height: 1.5; }
+
+  /* ── PLACEHOLDER ── */
+  .ph {
+    color: var(--gold);
+    background: rgba(251,191,36,0.08);
+    border: 1px dashed rgba(251,191,36,0.3);
+    border-radius: 4px; padding: 1px 6px;
+    font-family: var(--mono); font-size: 0.88em;
+  }
+
+  /* ── NAV ── */
+  .navbar {
+    position: fixed; bottom: 26px; left: 0; right: 0; z-index: 5;
+    display: flex; justify-content: center; align-items: center; gap: 14px;
+  }
+  .dots { display: flex; gap: 9px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.18); transition: all .35s ease; cursor: pointer; }
+  .dot.on { width: 22px; border-radius: 5px; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+  .arrows { display: flex; gap: 8px; margin-left: 14px; }
+  .arrow {
+    width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--edge);
+    background: rgba(255,255,255,0.02); color: var(--text-hi);
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    transition: background .2s, border-color .2s; font-size: 16px;
+  }
+  .arrow:hover { background: rgba(255,255,255,0.07); border-color: rgba(148,163,255,.4); }
+  .arrow:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .progress-top {
+    position: fixed; top: 0; left: 0; height: 2px;
+    background: linear-gradient(90deg, var(--blue), var(--violet), var(--cyan));
+    z-index: 6; transition: width .5s ease;
+  }
+  .kicker-fixed {
+    position: fixed; top: 26px; left: 9vw; z-index: 5;
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: .14em;
+    color: var(--text-lo); text-transform: uppercase;
+  }
+  .kicker-fixed b { color: var(--text-mid); }
+
+  ::selection { background: rgba(139,92,246,.4); }
+</style>
+</head>
+<body>
+
+<div class="field">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+  <div class="grid-overlay"></div>
+</div>
+
+<div class="progress-top" id="progressTop"></div>
+<div class="kicker-fixed">A1 Innovations &nbsp;/&nbsp; <b>Solution Call</b></div>
+
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SLIDE 1 — TITLE -->
+  <!-- ═══════════════════════════════════════ -->
+  <section class="slide active" data-label="Welcome">
+    <div class="eyebrow green">Solution Call</div>
+    <h1><span class="ph">[Client Name]</span>, here's your build.</h1>
+    <p class="sub-head">We took everything from our discovery call and put together a custom system for <span class="ph">[Company Name]</span>. Today we walk through exactly what you're getting — and what it returns.</p>
+    <div class="meta-row">
+      <div class="chip">🏢 <b><span class="ph">[Company Name]</span></b></div>
+      <div class="chip">📅 <b><span class="ph">[Date]</span></b></div>
+      <div class="chip">🎯 <b><span class="ph">[Industry]</span></b></div>
+      <div class="chip">⏱ <b>45 min</b></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SLIDE 2 — WHAT WE DISCUSSED -->
+  <!-- ═══════════════════════════════════════ -->
+  <section class="slide" data-label="What We Discussed">
+    <div class="eyebrow violet">Discovery Recap</div>
+    <h1 style="font-size:clamp(26px,3.4vw,46px); max-width:28ch;">What we discussed — and what success looks like for <span class="ph">[Client Name]</span>.</h1>
+    <div class="cards g2 stagger" style="margin-top:22px; align-items:start;">
+      <div class="card red">
+        <span class="tag">⚠ Core Problems</span>
+        <ul class="prob-list">
+          <li><span class="bullet">✕</span><span><span class="ph">[Problem 1 — e.g. "Missing 4–5 inbound calls per day, no after-hours coverage"]</span></span></li>
+          <li><span class="bullet">✕</span><span><span class="ph">[Problem 2 — e.g. "Leads going cold — no automated follow-up system in place"]</span></span></li>
+          <li><span class="bullet">✕</span><span><span class="ph">[Problem 3 — e.g. "Owner manually handling all scheduling and dispatching"]</span></span></li>
+        </ul>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div class="card green">
+          <span class="tag">✓ What Success Looks Like</span>
+          <ul class="prob-list green">
+            <li><span class="bullet">→</span><span><span class="ph">[Goal 1 — e.g. "Never miss a call — every inbound handled 24/7"]</span></span></li>
+            <li><span class="bullet">→</span><span><span class="ph">[Goal 2 — e.g. "Leads responded to in under 60 seconds automatically"]</span></span></li>
+            <li><span class="bullet">→</span><span><span class="ph">[Goal 3 — e.g. "Owner fully out of day-to-day operations by Month 3"]</span></span></li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="tag">Key Numbers</span>
+          <div class="data-rows">
+            <div class="data-row"><span class="lbl">Leads / month</span><span class="val cyan"><span class="ph">[#]</span></span></div>
+            <div class="data-row"><span class="lbl">Avg job value</span><span class="val gold"><span class="ph">$[X]</span></span></div>
+            <div class="data-row"><span class="lbl">Calls missed / day</span><span class="val red"><span class="ph">[#]</span></span></div>
+            <div class="data-row"><span class="lbl">Current close rate</span><span class="val violet"><span class="ph">[X]%</span></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SLIDE 3 — WHAT THIS IS COSTING YOU -->
+  <!-- ═══════════════════════════════════════ -->
+  <section class="slide" data-label="What It's Costing You">
+    <div class="eyebrow red">The Real Cost</div>
+    <h1 style="font-size:clamp(28px,3.8vw,52px); max-width:24ch;">Here's what these problems are actually costing <span class="ph">[Company Name]</span>.</h1>
+    <p class="lede" style="margin-top:12px;">These aren't hypotheticals. Based on your numbers — this is what's walking out the door every month right now.</p>
+    <div class="loss-box">
+      <div class="loss-label">Revenue Lost Per Month — Estimated</div>
+      <div class="loss-numbers">
+        <div class="loss-num">
+          <div class="amount"><span class="ph">$[X]</span></div>
+          <div class="period">From Missed Calls</div>
+        </div>
+        <div class="loss-num">
+          <div class="amount"><span class="ph">$[X]</span></div>
+          <div class="period">From Cold Leads</div>
+        </div>
+        <div class="loss-num">
+          <div class="amount"><span class="ph">$[X]</span></div>
+          <div class="period">From Lost Repeat Business</div>
+        </div>
+        <div class="loss-num">
+          <div class="amount" style="background:linear-gradient(120deg,#f87171,#fbbf24); -webkit-background-clip:text; background-clip:text; color:transparent;"><span class="ph">$[Total]</span></div>
+          <div class="period">Total / Month</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SLIDE 4 — YOUR SPECIFIC INTELLIGENT SYSTEM -->
+  <!-- ═══════════════════════════════════════ -->
+  <section class="slide" data-label="Your System">
+    <div class="eyebrow">What We're Building</div>
+    <h1 style="font-size:clamp(24px,3.2vw,44px); max-width:30ch;">Your specific intelligent system — built for <span class="ph">[Company Name]</span>.</h1>
+    <div class="cards g3 stagger" style="margin-top:20px;">
+      <div class="card blue">
+        <span class="tag"><span class="ph">[System 1 Name — e.g. "Speed to Lead"]</span></span>
+        <h3><span class="ph">[System 1 Short Name]</span></h3>
+        <p><span class="ph">[Outcome description — e.g. "Every inbound lead gets a response in under 60 seconds, 24/7. SMS, email, or AI voice call — routed by how they want to be reached."]</span></p>
+      </div>
+      <div class="card violet">
+        <span class="tag"><span class="ph">[System 2 Name — e.g. "AI Voice Agent"]</span></span>
+        <h3><span class="ph">[System 2 Short Name]</span></h3>
+        <p><span class="ph">[Outcome description — e.g. "Handles every inbound call after hours, books jobs, answers questions, and routes urgent calls — so you never miss a job again."]</span></p>
+      </div>
+      <div class="card gold">
+        <span class="tag"><span class="ph">[System 3 Name — e.g. "Client Nurture System"]</span></span>
+        <h3><span class="ph">[System 3 Short Name]</span></h3>
+        <p><span class="ph">[Outcome description — e.g. "Every past client stays in contact with your business automatically — so when they need work done again, you're the first call they make."]</span></p>
+      </div>
+    </div>
+    <div style="margin-top:16px; padding:14px 20px; background:rgba(255,255,255,0.02); border:1px solid rgba(148,163,255,0.08); border-radius:10px; display:flex; align-items:center; gap:12px;">
+      <span style="font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-lo);">Deliverables</span>
+      <span style="color:var(--text-mid); font-size:13px;"><span class="ph">[Deliverable 1]</span> &nbsp;·&nbsp; <span class="ph">[Deliverable 2]</span> &nbsp;·&nbsp; <span class="ph">[Deliverable 3]</span> &nbsp;·&nbsp; 30-Day Post-Launch Support &nbsp;·&nbsp; Team Onboarding</span>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SLIDE 5 — RETURN ON INVESTMENT -->
+  <!-- ═══════════════════════════════════════ -->
+  <section class="slide" data-label="Return on Investment">
+    <div class="eyebrow green">Return on Investment</div>
+    <h1 style="font-size:clamp(26px,3.4vw,48px); max-width:26ch;">Here's what implementing this returns for <span class="ph">[Company Name]</span>.</h1>
+    <div class="roi-grid stagger">
+      <div class="roi-card">
+        <div class="roi-val cyan"><span class="ph">[X]%</span></div>
+        <div class="roi-lbl">Close Rate Increase</div>
+      </div>
+      <div class="roi-card">
+        <div class="roi-val green"><span class="ph">[X] hrs</span></div>
+        <div class="roi-lbl">Saved Per Week</div>
+      </div>
+      <div class="roi-card">
+        <div class="roi-val gold"><span class="ph">$[X]</span></div>
+        <div class="roi-lbl">Est. Added Rev / Mo</div>
+      </div>
+      <div class="roi-card">
+        <div class="roi-val violet"><span class="ph">[X] mo</span></div>
+        <div class="roi-lbl">Payback Period</div>
+      </div>
+    </div>
+    <div style="margin-top:18px; max-width:680px; padding:16px 20px; background:linear-gradient(160deg,rgba(52,211,153,0.06),rgba(79,107,255,0.03)); border:1px solid rgba(52,211,153,0.14); border-radius:12px; font-size:14px; color:var(--text-mid); line-height:1.65; opacity:0; animation:riseIn .6s ease forwards; animation-delay:.7s;">
+      <span class="ph">[ROI statement specific to this client — e.g. "At your current numbers, recovering just 3 missed calls per week covers the full monthly retainer. Everything after that is pure upside."]</span>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SLIDE 6 — PROJECT TIMELINE -->
+  <!-- ═══════════════════════════════════════ -->
+  <section class="slide" data-label="Project Timeline">
+    <div class="eyebrow violet">Project Timeline</div>
+    <h1 style="font-size:clamp(26px,3.4vw,48px); max-width:24ch;">From kickoff to live — here's exactly how this goes.</h1>
+    <div class="tl-grid stagger">
+      <div class="tl-card t1">
+        <div class="tl-phase">Phase 01</div>
+        <h4>Onboarding & Scoping</h4>
+        <p>Access granted, integrations confirmed, full build scope locked in with your team.</p>
+        <div class="tl-timing">Week 1</div>
+      </div>
+      <div class="tl-card t2">
+        <div class="tl-phase">Phase 02</div>
+        <h4>Build & Integration</h4>
+        <p>Active development. Custom dashboard so you can track every build in real time. Weekly check-in calls.</p>
+        <div class="tl-timing"><span class="ph">Week 2–3</span></div>
+      </div>
+      <div class="tl-card t3">
+        <div class="tl-phase">Phase 03</div>
+        <h4>QA & Testing</h4>
+        <p>Live testing with your team. We refine until everything runs exactly the way it should before go-live.</p>
+        <div class="tl-timing"><span class="ph">Week <span class="ph">[X]</span></span></div>
+      </div>
+      <div class="tl-card t4">
+        <div class="tl-phase">Phase 04</div>
+        <h4>Go Live 🚀</h4>
+        <p>System is live. Team is onboarded. 30-day support window begins. You're running.</p>
+        <div class="tl-timing"><span class="ph">Week <span class="ph">[X]</span></span></div>
+      </div>
+    </div>
+    <div style="margin-top:16px; display:flex; gap:24px; opacity:0; animation:riseIn .6s ease forwards; animation-delay:.72s;">
+      <div style="font-family:var(--mono); font-size:12px; color:var(--text-lo);">Total timeline: <span style="color:var(--green);"><span class="ph">[X–X weeks]</span></span></div>
+      <div style="font-family:var(--mono); font-size:12px; color:var(--text-lo);">First delivery: <span style="color:var(--cyan);">Week 3 max</span></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SLIDE 7 — TOTAL INVESTMENT -->
+  <!-- ═══════════════════════════════════════ -->
+  <section class="slide" data-label="Total Investment">
+    <div class="eyebrow gold">Investment</div>
+    <h1 style="font-size:clamp(26px,3.4vw,46px); max-width:26ch;">Here's what this looks like for <span class="ph">[Company Name]</span>.</h1>
+    <div style="display:flex; gap:28px; align-items:flex-start; margin-top:20px; flex-wrap:wrap;">
+      <div class="invest-box" style="flex:1; min-width:300px;">
+        <div class="invest-label">Total Investment</div>
+        <div class="invest-amount"><span class="ph">$[Total]</span></div>
+        <div class="invest-type"><span class="ph">[e.g. One-time upfront + $X/mo maintenance]</span></div>
+        <div class="invest-rows">
+          <div class="data-rows">
+            <div class="data-row"><span class="lbl"><span class="ph">[Line Item 1]</span></span><span class="val green"><span class="ph">$[X]</span></span></div>
+            <div class="data-row"><span class="lbl"><span class="ph">[Line Item 2]</span></span><span class="val green"><span class="ph">$[X]</span></span></div>
+            <div class="data-row"><span class="lbl"><span class="ph">[Line Item 3 if applicable]</span></span><span class="val green"><span class="ph">$[X]</span></span></div>
+            <div class="data-row"><span class="lbl">Monthly Maintenance</span><span class="val cyan"><span class="ph">$[X]/mo</span></span></div>
+            <div class="data-row" style="padding-top:14px; border-top:1px solid rgba(52,211,153,0.15); margin-top:6px;">
+              <span style="font-family:var(--disp); font-weight:700; font-size:15px; color:var(--text-hi);">Total Upfront</span>
+              <span style="font-family:var(--mono); font-size:16px; color:var(--green); font-weight:600;"><span class="ph">$[Total]</span></span>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:16px; font-family:var(--mono); font-size:11px; color:var(--text-lo); line-height:1.6;">
+          Payment terms: <span style="color:var(--text-mid);"><span class="ph">[e.g. 50% upfront, 50% at go-live]</span></span>
+        </div>
+      </div>
+      <div style="flex:1; min-width:260px; display:flex; flex-direction:column; gap:12px; opacity:0; animation:riseIn .6s ease forwards; animation-delay:.5s;">
+        <div style="font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--text-lo); margin-bottom:4px;">What You're Recovering</div>
+        <div class="card green" style="padding:16px 18px;">
+          <span class="tag">Monthly Revenue Recovered</span>
+          <div style="font-family:var(--disp); font-size:26px; font-weight:700; color:var(--green);"><span class="ph">$[X] / mo</span></div>
+          <p style="margin-top:6px; font-size:12px;">Based on your numbers — recovering missed calls and cold leads alone covers this in the first month.</p>
+        </div>
+        <div class="card" style="padding:16px 18px;">
+          <span class="tag">Payback Period</span>
+          <div style="font-family:var(--disp); font-size:26px; font-weight:700; color:var(--cyan);"><span class="ph">[X] weeks</span></div>
+          <p style="margin-top:6px; font-size:12px;">Time from investment to full cost recovery at projected output.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SLIDE 8 — LET'S GET BUILDING -->
+  <!-- ═══════════════════════════════════════ -->
+  <section class="slide" data-label="Let's Get Building">
+    <div class="eyebrow green">Ready to Move</div>
+    <h1 style="font-size:clamp(30px,4.2vw,58px); max-width:20ch;">Let's get building, <span class="ph">[Client Name]</span>.</h1>
+    <p class="sub-head" style="max-width:46ch;">Here's what moving forward looks like — simple, fast, no friction.</p>
+    <div class="close-steps">
+      <div class="close-step">
+        <div class="cs-icon">💳</div>
+        <div>
+          <h4>Step 1 — Initial Payment</h4>
+          <p><span class="ph">[e.g. 50% deposit — $X — secures your build slot. Link below.]</span></p>
+        </div>
+      </div>
+      <div class="close-step">
+        <div class="cs-icon">✍️</div>
+        <div>
+          <h4>Step 2 — Sign the Agreement</h4>
+          <p>Simple contract, sent via DocuSign. Takes 2 minutes. We send it the same day.</p>
+        </div>
+      </div>
+      <div class="close-step">
+        <div class="cs-icon">📅</div>
+        <div>
+          <h4>Step 3 — Kickoff Call Scheduled</h4>
+          <p>We book your kickoff within <span class="ph">[X days]</span> of payment. Build starts immediately after — no waiting.</p>
+        </div>
+      </div>
+    </div>
+    <button class="pay-btn" onclick="alert('Payment link goes here')">
+      <span>→ Complete Payment</span>
+      <span class="arrow-r">↗</span>
+    </button>
+  </section>
+
+</div><!-- /deck -->
+
+<!-- NAV -->
+<div class="navbar">
+  <div class="dots" id="dots"></div>
+  <div class="arrows">
+    <button class="arrow" id="prevBtn" onclick="go(-1)" disabled>←</button>
+    <button class="arrow" id="nextBtn" onclick="go(1)">→</button>
+  </div>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let cur = 0;
+
+  const dotsEl = document.getElementById('dots');
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' on' : '');
+    d.onclick = () => goTo(i);
+    dotsEl.appendChild(d);
+  });
+
+  function goTo(i) {
+    if (i < 0 || i >= total) return;
+    slides[cur].classList.remove('active');
+    cur = i;
+    slides[cur].classList.add('active');
+    document.querySelectorAll('.dot').forEach((d, idx) => d.classList.toggle('on', idx === cur));
+    document.getElementById('progressTop').style.width = ((cur + 1) / total * 100) + '%';
+    document.getElementById('prevBtn').disabled = cur === 0;
+    document.getElementById('nextBtn').disabled = cur === total - 1;
+    document.querySelector('.kicker-fixed b').textContent = slides[cur].dataset.label || 'Solution Call';
+  }
+
+  function go(dir) { goTo(cur + dir); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') go(-1);
+  });
+
+  document.getElementById('progressTop').style.width = (1 / total * 100) + '%';
+</script>
+</body>
+</html>
