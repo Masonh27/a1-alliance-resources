@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beginner Guide to AI Automation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#07070d;
+    --bg-1:#0c0d18;
+    --panel:#12131f;
+    --edge:rgba(148,163,255,0.14);
+    --blue:#4f6bff;
+    --violet:#8b5cf6;
+    --cyan:#5eead4;
+    --gold:#fbbf24;
+    --green:#34d399;
+    --text-hi:#f3f4fb;
+    --text-mid:#a9adc9;
+    --text-lo:#6b6f8f;
+    --mono:'JetBrains Mono', monospace;
+    --disp:'Space Grotesk', sans-serif;
+    --body:'Inter', sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;background:var(--bg-0);overflow:hidden;}
+  body{font-family:var(--body);color:var(--text-hi);position:relative;-webkit-font-smoothing:antialiased;}
+
+  .field{position:fixed;inset:0;z-index:0;overflow:hidden;}
+  .orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.35;}
+  .orb1{width:520px;height:520px;background:var(--blue);top:-120px;left:-100px;animation:drift1 22s ease-in-out infinite;}
+  .orb2{width:460px;height:460px;background:var(--violet);bottom:-140px;right:-80px;animation:drift2 26s ease-in-out infinite;}
+  .orb3{width:300px;height:300px;background:var(--cyan);top:40%;left:60%;opacity:0.14;animation:drift3 30s ease-in-out infinite;}
+  @keyframes drift1{0%,100%{transform:translate(0,0)}50%{transform:translate(60px,80px)}}
+  @keyframes drift2{0%,100%{transform:translate(0,0)}50%{transform:translate(-70px,-50px)}}
+  @keyframes drift3{0%,100%{transform:translate(0,0)}50%{transform:translate(-40px,60px)}}
+  .grid-overlay{position:absolute;inset:0;
+    background-image:linear-gradient(var(--edge) 1px,transparent 1px),linear-gradient(90deg,var(--edge) 1px,transparent 1px);
+    background-size:64px 64px;opacity:0.35;
+    mask-image:radial-gradient(ellipse at 50% 40%,black 0%,transparent 75%);}
+
+  .deck{position:relative;z-index:2;height:100vh;width:100vw;}
+  .slide{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;justify-content:center;
+    padding:8vh 9vw;
+    opacity:0;visibility:hidden;
+    transform:translateY(24px);
+    transition:opacity .6s ease,transform .6s ease,visibility .6s;
+  }
+  .slide.active{opacity:1;visibility:visible;transform:translateY(0);}
+
+  .eyebrow{
+    font-family:var(--mono);font-size:12.5px;letter-spacing:0.18em;text-transform:uppercase;
+    color:var(--cyan);display:flex;align-items:center;gap:10px;margin-bottom:22px;
+    opacity:0;animation:riseIn .6s ease forwards;animation-delay:.1s;
+  }
+  .eyebrow::before{content:'';width:26px;height:1px;background:var(--cyan);display:inline-block;}
+  h1{
+    font-family:var(--disp);font-weight:700;line-height:1.02;letter-spacing:-0.02em;
+    font-size:clamp(38px,5.4vw,74px);
+    background:linear-gradient(120deg,#ffffff 20%,#c9cdff 55%,#8b9cff 85%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    opacity:0;animation:riseIn .7s ease forwards;animation-delay:.2s;
+    max-width:18ch;
+  }
+  .lede{
+    font-size:17px;color:var(--text-mid);max-width:56ch;line-height:1.7;margin-top:20px;
+    opacity:0;animation:riseIn .7s ease forwards;animation-delay:.38s;
+  }
+  @keyframes riseIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+  .stagger>*{opacity:0;transform:translateY(16px);animation:riseIn .55s ease forwards;}
+  .stagger>*:nth-child(1){animation-delay:.42s}
+  .stagger>*:nth-child(2){animation-delay:.50s}
+  .stagger>*:nth-child(3){animation-delay:.58s}
+  .stagger>*:nth-child(4){animation-delay:.66s}
+  .stagger>*:nth-child(5){animation-delay:.74s}
+
+  /* CARDS */
+  .cards{display:grid;gap:16px;margin-top:28px;}
+  .cards.g3{grid-template-columns:repeat(3,1fr);}
+  .cards.g2{grid-template-columns:repeat(2,1fr);}
+  .card{
+    background:linear-gradient(160deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01));
+    border:1px solid var(--edge);border-radius:14px;padding:22px;
+    backdrop-filter:blur(6px);
+  }
+  .card .num{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px;}
+  .card .num.cyan{color:var(--cyan);}
+  .card .num.violet{color:var(--violet);}
+  .card .num.gold{color:var(--gold);}
+  .card .num.green{color:var(--green);}
+  .card h3{font-family:var(--disp);font-size:20px;font-weight:600;margin-bottom:8px;color:var(--text-hi);}
+  .card p{font-size:14px;color:var(--text-mid);line-height:1.65;}
+
+  /* BIG STAT CARDS */
+  .stat-card{
+    background:linear-gradient(160deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01));
+    border:1px solid var(--edge);border-radius:14px;padding:28px 24px;text-align:center;
+  }
+  .stat-card .big{font-family:var(--disp);font-size:clamp(36px,4vw,56px);font-weight:700;line-height:1;}
+  .stat-card .big.cyan{color:var(--cyan);}
+  .stat-card .big.violet{color:var(--violet);}
+  .stat-card .big.gold{color:var(--gold);}
+  .stat-card .big.green{color:var(--green);}
+  .stat-card p{font-size:13px;color:var(--text-mid);margin-top:8px;line-height:1.5;}
+
+  /* TRACK */
+  .track{position:relative;margin-top:28px;padding-left:26px;}
+  .track::before{content:'';position:absolute;left:5px;top:6px;bottom:6px;width:2px;
+    background:linear-gradient(var(--blue),var(--violet));border-radius:2px;}
+  .step{position:relative;padding-bottom:20px;}
+  .step:last-child{padding-bottom:0;}
+  .step::before{content:'';position:absolute;left:-26px;top:4px;width:12px;height:12px;
+    border-radius:50%;background:var(--bg-0);border:2px solid var(--cyan);}
+  .step h4{font-family:var(--disp);font-size:17px;font-weight:600;color:var(--text-hi);}
+  .step p{font-size:14px;color:var(--text-mid);margin-top:4px;max-width:58ch;line-height:1.55;}
+
+  /* FRAMEWORK STEPS */
+  .fw-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px;}
+  .fw-card{
+    border-radius:14px;padding:28px 22px;
+    background:linear-gradient(160deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01));
+    border:1px solid var(--edge);position:relative;overflow:hidden;text-align:center;
+  }
+  .fw-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+  .fw-card.c1::before{background:linear-gradient(90deg,var(--cyan),var(--blue));}
+  .fw-card.c2::before{background:linear-gradient(90deg,var(--blue),var(--violet));}
+  .fw-card.c3::before{background:linear-gradient(90deg,var(--violet),var(--gold));}
+  .fw-num{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px;}
+  .fw-card.c1 .fw-num{color:var(--cyan);}
+  .fw-card.c2 .fw-num{color:var(--violet);}
+  .fw-card.c3 .fw-num{color:var(--gold);}
+  .fw-icon{font-size:36px;margin-bottom:12px;}
+  .fw-card h3{font-family:var(--disp);font-size:22px;font-weight:700;color:var(--text-hi);margin-bottom:8px;}
+  .fw-card p{font-size:13px;color:var(--text-mid);line-height:1.6;}
+
+  /* MONEY CARDS */
+  .money-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px;}
+  .money-card{
+    border-radius:14px;padding:26px 22px;
+    background:linear-gradient(160deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01));
+    border:1px solid var(--edge);position:relative;overflow:hidden;
+  }
+  .money-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+  .money-card.m1::before{background:linear-gradient(90deg,var(--cyan),var(--blue));}
+  .money-card.m2::before{background:linear-gradient(90deg,var(--blue),var(--violet));}
+  .money-card.m3::before{background:linear-gradient(90deg,var(--violet),var(--gold));}
+  .money-card .role{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;}
+  .money-card.m1 .role{color:var(--cyan);}
+  .money-card.m2 .role{color:var(--violet);}
+  .money-card.m3 .role{color:var(--gold);}
+  .money-card h3{font-family:var(--disp);font-size:20px;font-weight:700;color:var(--text-hi);margin-bottom:8px;}
+  .money-card ul{list-style:none;display:flex;flex-direction:column;gap:6px;margin-top:8px;}
+  .money-card ul li{font-size:13px;color:var(--text-mid);padding-left:14px;position:relative;line-height:1.5;}
+  .money-card ul li::before{content:'→';position:absolute;left:0;color:var(--text-lo);font-size:11px;}
+
+  /* QA */
+  .qa-box{
+    margin-top:32px;border:1px solid var(--edge);border-radius:18px;
+    padding:40px 48px;
+    background:linear-gradient(160deg,rgba(79,107,255,0.08),rgba(139,92,246,0.04));
+    text-align:center;max-width:700px;
+  }
+  .qa-box .big-q{font-family:var(--disp);font-size:clamp(60px,8vw,100px);font-weight:700;
+    background:linear-gradient(135deg,var(--blue),var(--violet));
+    -webkit-background-clip:text;background-clip:text;color:transparent;line-height:1;}
+  .qa-box h3{font-family:var(--disp);font-size:26px;font-weight:600;margin-top:12px;color:var(--text-hi);}
+  .qa-box p{font-size:16px;color:var(--text-mid);margin-top:10px;line-height:1.65;}
+
+  /* PILL */
+  .pill{font-family:var(--mono);font-size:12.5px;letter-spacing:.08em;color:var(--cyan);
+    border:1px solid var(--edge);padding:9px 16px;border-radius:999px;background:rgba(94,234,212,0.06);}
+  .cta-row{margin-top:36px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+
+  /* NAV */
+  .navbar{position:fixed;bottom:26px;left:0;right:0;z-index:5;display:flex;justify-content:center;align-items:center;gap:14px;}
+  .dots{display:flex;gap:9px;}
+  .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.18);transition:all .35s ease;cursor:pointer;}
+  .dot.on{width:22px;border-radius:5px;background:linear-gradient(90deg,var(--blue),var(--cyan));}
+  .arrows{display:flex;gap:8px;margin-left:14px;}
+  .arrow{width:38px;height:38px;border-radius:50%;border:1px solid var(--edge);
+    background:rgba(255,255,255,0.02);color:var(--text-hi);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    transition:background .2s,border-color .2s;font-size:16px;}
+  .arrow:hover{background:rgba(255,255,255,0.07);border-color:rgba(148,163,255,.4);}
+  .progress-top{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--blue),var(--violet),var(--cyan));z-index:6;transition:width .5s ease;}
+  .kicker-fixed{position:fixed;top:26px;left:9vw;z-index:5;font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;color:var(--text-lo);text-transform:uppercase;}
+  .kicker-fixed b{color:var(--text-mid);}
+
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:28px;align-items:start;}
+
+  ::selection{background:rgba(139,92,246,.4);}
+</style>
+</head>
+<body>
+
+<div class="field">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+  <div class="grid-overlay"></div>
+</div>
+
+<div class="progress-top" id="progressTop" style="width:14.28%"></div>
+<div class="kicker-fixed">A1 Innovations &nbsp;/&nbsp; <b>Beginner Guide to AI Automation</b></div>
+
+<div class="deck" id="deck">
+
+  <!-- ═══════ SLIDE 1 — TITLE ═══════ -->
+  <section class="slide active">
+    <div class="eyebrow">A1 Innovations — Let's Get Into It</div>
+    <h1>Beginner Guide to AI Automation.</h1>
+    <p class="lede">No fluff. No jargon. Just the real picture of what AI automation is, why it matters right now, how to find the problems worth solving, and the three ways people are making real money in this space today.</p>
+    <div class="cta-row">
+      <span class="pill">7 SLIDES · ~10 MIN</span>
+      <span class="pill">Q&amp;A AT THE END</span>
+    </div>
+  </section>
+
+  <!-- ═══════ SLIDE 2 — WHY AI AUTOMATION ═══════ -->
+  <section class="slide">
+    <div class="eyebrow">Slide 01 — Why AI Automation</div>
+    <h1 style="font-size:clamp(32px,4.2vw,58px);">The demand is here. The timing is now.</h1>
+    <div class="split stagger">
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="card">
+          <div class="num cyan">TIME</div>
+          <h3>It gives business owners their time back.</h3>
+          <p>The average small business owner spends 20+ hours a week on tasks that could run automatically. Follow-ups, scheduling, quoting, reminders — AI handles all of it. You show up for the work only you can do.</p>
+        </div>
+        <div class="card">
+          <div class="num violet">MONEY</div>
+          <h3>It protects and generates revenue.</h3>
+          <p>Missed calls, slow follow-up, zero re-engagement — these are silent revenue leaks. AI automation plugs them. Businesses that implement now are capturing jobs their competitors are losing every single day.</p>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="card">
+          <div class="num gold">GROWTH</div>
+          <h3>It's only getting bigger.</h3>
+          <p>AI automation isn't a trend — it's the operating system of every competitive business in the next 5 years. The market is accelerating. Businesses that move now build the advantage that late movers will spend years trying to close.</p>
+        </div>
+        <div style="background:linear-gradient(160deg,rgba(79,107,255,0.10),rgba(139,92,246,0.05));border:1px solid var(--edge);border-radius:14px;padding:22px;">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--cyan);letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;">The Bottom Line</div>
+          <p style="font-family:var(--disp);font-size:18px;font-weight:600;color:var(--text-hi);line-height:1.4;">AI automation gives business owners <span style="color:var(--cyan);">time</span>, <span style="color:var(--gold);">money</span>, and a <span style="color:var(--violet);">competitive edge</span> — and it's only growing.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════ SLIDE 3 — WHY NOW ═══════ -->
+  <section class="slide">
+    <div class="eyebrow">Slide 02 — Why Now</div>
+    <h1 style="font-size:clamp(30px,4vw,56px);">Starting now means being ahead later.</h1>
+    <p class="lede">There is a gap in the market — and it's wide open. Every business owner I've spoken to has heard of AI. Almost none of them have done anything about it yet.</p>
+    <div class="cards g3 stagger" style="margin-top:24px;">
+      <div class="stat-card">
+        <div class="big cyan">87%</div>
+        <p>of small businesses have not yet implemented any form of AI automation into their operations</p>
+      </div>
+      <div class="stat-card">
+        <div class="big violet">The Gap</div>
+        <p>Everyone I've cold called, everyone I've spoken to — they know AI is coming. They just haven't moved yet. That gap is the opportunity.</p>
+      </div>
+      <div class="stat-card">
+        <div class="big gold">Now</div>
+        <p>The window to be an early mover in this space is open right now. First in wins. Every month of delay is a month handed to whoever moves first.</p>
+      </div>
+    </div>
+    <div style="margin-top:20px;padding:18px 22px;border:1px solid var(--edge);border-left:2px solid var(--cyan);border-radius:0 12px 12px 0;background:rgba(94,234,212,0.04);max-width:780px;opacity:0;animation:riseIn .6s ease forwards;animation-delay:.9s;">
+      <p style="font-size:15px;color:var(--text-hi);line-height:1.65;">"The businesses that integrate AI automation right now are positioning themselves to outperform competitors for years to come. The window is open — and we are moving through it fast."</p>
+    </div>
+  </section>
+
+  <!-- ═══════ SLIDE 4 — AI DOESN'T SOLVE THE PROBLEM. WE DO. ═══════ -->
+  <section class="slide">
+    <div class="eyebrow">Slide 03 — The Real Product</div>
+    <h1 style="font-size:clamp(30px,4vw,56px);">AI doesn't solve the problem. We do.</h1>
+    <p class="lede">This is the most important thing to understand. AI is a tool. We are the people who know how to use it. What we're really selling is our ability to find the problem and build the right solution.</p>
+    <div class="split stagger">
+      <div class="track">
+        <div class="step">
+          <h4>We find the bottleneck first</h4>
+          <p>Before we touch a single tool, we identify exactly what's costing the business the most — in time, in money, in missed opportunity. That's the problem we solve.</p>
+        </div>
+        <div class="step">
+          <h4>We sell us — not the technology</h4>
+          <p>Clients don't hire us because they understand AI. They hire us because they trust us to understand their business and fix what's broken. The relationship is the product.</p>
+        </div>
+        <div class="step">
+          <h4>AI is the vehicle, not the destination</h4>
+          <p>We use VAPI, n8n, Claude, GoHighLevel — but none of that matters to the client. What matters is that their phone gets answered, their leads get followed up, and their calendar fills itself.</p>
+        </div>
+        <div class="step">
+          <h4>Results over technology, always</h4>
+          <p>Never lead with the tool. Lead with the outcome. "You'll never miss an after-hours call again" beats "we'll set up a VAPI voice agent" every single time.</p>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div style="background:linear-gradient(160deg,rgba(139,92,246,0.10),rgba(79,107,255,0.04));border:1px solid var(--edge);border-radius:14px;padding:24px;">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--violet);letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px;">Wrong way to pitch</div>
+          <p style="font-size:14px;color:var(--text-lo);line-height:1.65;font-style:italic;">"We build AI voice agents using VAPI integrated with n8n workflows and CRM automation pipelines..."</p>
+        </div>
+        <div style="background:linear-gradient(160deg,rgba(94,234,212,0.08),rgba(79,107,255,0.04));border:1px solid rgba(94,234,212,0.2);border-radius:14px;padding:24px;">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--cyan);letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px;">Right way to pitch</div>
+          <p style="font-size:14px;color:var(--text-hi);line-height:1.65;font-style:italic;">"You're losing jobs every week to missed calls. We fix that — and your phone answers itself at 9 PM on a Sunday."</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════ SLIDE 5 — THE 3 STEP FRAMEWORK ═══════ -->
+  <section class="slide">
+    <div class="eyebrow">Slide 04 — The Framework</div>
+    <h1 style="font-size:clamp(30px,4vw,54px);">How to find the problem and build the solution.</h1>
+    <p class="lede">This is the three-step process we use on every client. Define the problem. Evaluate what fixing it is worth. Then build.</p>
+    <div class="fw-grid stagger">
+
+      <div class="fw-card c1">
+        <div class="fw-num">Step 01</div>
+        <div class="fw-icon">🔍</div>
+        <h3>Define</h3>
+        <p>Find the bottleneck that's costing the most. Ask the right questions — where are you losing time? Where are leads falling through? What's the one thing you wish ran itself? That answer is your build target.</p>
+      </div>
+
+      <div class="fw-card c2">
+        <div class="fw-num">Step 02</div>
+        <div class="fw-icon">⚖️</div>
+        <h3>Evaluate</h3>
+        <p>Tie the problem to real money. How many calls are you missing a week? What's the average job value? If you fix this — what does it return? The ROI has to be clear before you pitch anything.</p>
+      </div>
+
+      <div class="fw-card c3">
+        <div class="fw-num">Step 03</div>
+        <div class="fw-icon">⚙️</div>
+        <h3>Build</h3>
+        <p>Design the simplest system that solves the problem. Don't overbuild. A 3-step workflow that works beats a 9-step system every time. Simplify first. Automate last. Ship fast.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════ SLIDE 6 — 3 WAYS TO MAKE MONEY ═══════ -->
+  <section class="slide">
+    <div class="eyebrow">Slide 05 — The Money</div>
+    <h1 style="font-size:clamp(30px,4vw,54px);">Three ways to make money in AI automation.</h1>
+    <p class="lede">You don't have to be a developer to win in this space. Here are the three main roles — and how each one generates real income.</p>
+    <div class="money-grid stagger">
+
+      <div class="money-card m1">
+        <div class="role">Path 01 — Sales</div>
+        <h3>The Closer</h3>
+        <p style="font-size:13px;color:var(--text-mid);margin-bottom:12px;line-height:1.6;">You don't build anything. You find the businesses that need this, run the discovery, close the deal, and hand it to the dev team. Commission-based. High upside. Pure sales.</p>
+        <ul>
+          <li>Outreach, cold calls, discovery calls</li>
+          <li>Qualify the problem into the right offer</li>
+          <li>Close and hand off — then go again</li>
+          <li>No technical knowledge required</li>
+          <li>Income scales directly with your reps</li>
+        </ul>
+      </div>
+
+      <div class="money-card m2">
+        <div class="role">Path 02 — Development</div>
+        <h3>The Builder</h3>
+        <p style="font-size:13px;color:var(--text-mid);margin-bottom:12px;line-height:1.6;">You build the systems. Voice agents, nurture workflows, CRM automations, custom AI logic. Every build a sales rep closes lands on your desk. Project fees plus ongoing maintenance revenue.</p>
+        <ul>
+          <li>Build the systems clients pay for</li>
+          <li>Tools: VAPI, n8n, Claude API, GHL</li>
+          <li>Project-based + monthly retainer income</li>
+          <li>Builds compound — systems need maintenance</li>
+          <li>The higher the complexity, the higher the fee</li>
+        </ul>
+      </div>
+
+      <div class="money-card m3">
+        <div class="role">Path 03 — Founder</div>
+        <h3>The Operator</h3>
+        <p style="font-size:13px;color:var(--text-mid);margin-bottom:12px;line-height:1.6;">You run the agency. You hire the sales reps. You hire the devs. You manage the client relationships and build the machine. Every deal your team closes flows through you.</p>
+        <ul>
+          <li>Build the team around you</li>
+          <li>Own the client relationships and delivery</li>
+          <li>Layer in recurring revenue as the base</li>
+          <li>Scale through people, not just skills</li>
+          <li>This is the long game — highest ceiling</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════ SLIDE 7 — Q&A ═══════ -->
+  <section class="slide">
+    <div class="eyebrow">That's the Overview</div>
+    <h1 style="font-size:clamp(36px,5vw,68px);">Open floor.</h1>
+    <p class="lede">We covered the why, the when, the framework, and the money. Now it's your turn. No question is too basic — this is exactly the time to ask it.</p>
+    <div class="qa-box stagger">
+      <div class="big-q">Q&amp;A</div>
+      <h3>What questions do you have?</h3>
+      <p>Ask anything — about the industry, the opportunity, the framework, the money, or how to get started. This is the conversation that matters most.</p>
+    </div>
+    <div style="margin-top:28px;opacity:0;animation:riseIn .6s ease forwards;animation-delay:.9s;">
+      <button onclick="openRecap()" class="recap-btn">
+        <span>📋</span>
+        View Call Recap — August 14, 2026
+        <span class="recap-btn-arrow">→</span>
+      </button>
+    </div>
+  </section>
+
+</div><!-- /deck -->
+
+<div class="navbar">
+  <div class="arrows"><div class="arrow" id="prevBtn">‹</div></div>
+  <div class="dots" id="dots"></div>
+  <div class="arrows"><div class="arrow" id="nextBtn">›</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- RECAP MODAL                                         -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="recapModal" class="recap-modal">
+  <div class="recap-modal-inner">
+
+    <!-- Fixed header -->
+    <div class="recap-header">
+      <div class="recap-header-left">
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);margin-bottom:4px;">A1 Alliance — First Group Call</div>
+        <div style="font-family:var(--disp);font-size:20px;font-weight:700;color:var(--text-hi);">Call Recap &amp; Key Takeaways</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--text-lo);margin-top:3px;">August 14, 2026 · 5:28 PM EDT · 1hr 17min</div>
+      </div>
+      <button onclick="closeRecap()" class="recap-close">✕ Close</button>
+    </div>
+
+    <!-- Scrollable body -->
+    <div class="recap-body">
+
+      <!-- ATTENDEES -->
+      <div class="recap-section">
+        <div class="recap-section-label">Attendees</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;">
+          <span class="recap-tag">Mason Harold</span>
+          <span class="recap-tag">Trudell Scales</span>
+          <span class="recap-tag">Billy Bob</span>
+          <span class="recap-tag">Basil</span>
+          <span class="recap-tag">Tecee</span>
+          <span class="recap-tag">Vekora</span>
+          <span class="recap-tag">Zain Tawakkul</span>
+        </div>
+      </div>
+
+      <!-- KEY TAKEAWAYS -->
+      <div class="recap-section">
+        <div class="recap-section-label">Key Takeaways</div>
+        <div class="recap-grid-2">
+
+          <div class="recap-card">
+            <div class="recap-card-num cyan">01</div>
+            <h4>The window is open right now.</h4>
+            <p>87% of small businesses have not implemented any form of AI automation. Every business owner Mason has called is the first person on their phone talking about it. That gap is the opportunity — and it closes every year.</p>
+          </div>
+
+          <div class="recap-card">
+            <div class="recap-card-num violet">02</div>
+            <h4>You sell outcomes. Never the technology.</h4>
+            <p>If you lead with "AI automation," business owners get confused and tune out. Lead with: "You'll never miss a phone call again." Results close deals. Technology confuses them. This was the biggest lesson Mason learned the hard way in his first 4 months.</p>
+          </div>
+
+          <div class="recap-card">
+            <div class="recap-card-num cyan">03</div>
+            <h4>The 3-step framework: Define → Evaluate → Build.</h4>
+            <p>You can't build a solution for a problem you don't know exists. Define the bottleneck first (discovery call). Tie it to real money (missed calls × avg job value × weeks). Then build the simplest system that solves it. Simplify first. Automate last. Ship fast.</p>
+          </div>
+
+          <div class="recap-card">
+            <div class="recap-card-num violet">04</div>
+            <h4>Three lanes. Pick yours and go deep.</h4>
+            <p>Sales (close on the phone, no technical skills required), Development (build the systems, maintain the builds, project + retainer income), or Founder (run the whole machine — sales, dev, client relationships, team building). Every lane makes real money. Pick one and master it.</p>
+          </div>
+
+          <div class="recap-card">
+            <div class="recap-card-num cyan">05</div>
+            <h4>Start free or cheap. Scale by 30%.</h4>
+            <p>First 2–3 clients — go free or heavily discounted to get real case studies. Once you have proof, raise your offer AND your value by 30%. Price based on: time to build, cost to run, what others charge, and making sure your team eats too.</p>
+          </div>
+
+          <div class="recap-card">
+            <div class="recap-card-num violet">06</div>
+            <h4>The founder route is not a side hustle.</h4>
+            <p>Mason was at Catapult from 9 AM and was staying until 10–11 PM finishing a build. 16+ hour days. If you want to run the agency, you have to be willing to go all in. Learn the skills first (sell and build), make 2–3 real sales, then bring on a team. Don't build a team before you've proven the process yourself.</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Q&A HIGHLIGHTS -->
+      <div class="recap-section">
+        <div class="recap-section-label">Q&amp;A Highlights — What Got Asked, What Got Answered</div>
+        <div class="recap-track">
+
+          <div class="recap-step">
+            <div class="recap-step-dot"></div>
+            <div>
+              <h4>Where do you find people to hire?</h4>
+              <p>Facebook groups, Upwork (especially for developers), Fiverr, personal network, and your own community. Mason's first developer is in college. His sales rep is a personal friend. Lead with who you know and who's hungry. Don't hire until you know the process yourself — you need to be able to show them what right looks like.</p>
+            </div>
+          </div>
+
+          <div class="recap-step">
+            <div class="recap-step-dot"></div>
+            <div>
+              <h4>Are you selling automations or yourself as the operator? (Basil)</h4>
+              <p>You're selling yourself, your outcomes, and your trust. Not the automation. Business owners don't buy things they don't understand — but they will buy from someone standing in front of them making a real promise. The automation is the delivery vehicle. You are the product.</p>
+            </div>
+          </div>
+
+          <div class="recap-step">
+            <div class="recap-step-dot"></div>
+            <div>
+              <h4>How do you price? Per workflow, retainer, or outcome-based? (Basil)</h4>
+              <p>Base it on: (1) how long it takes to build, (2) what it costs to run, (3) developer maintenance time, (4) what the market charges, (5) making sure everyone on your team makes money. Mason splits it: sales gets a %, developer gets a %, founder reinvests the rest. Start cheap, prove it, then raise by 30%.</p>
+            </div>
+          </div>
+
+          <div class="recap-step">
+            <div class="recap-step-dot"></div>
+            <div>
+              <h4>If starting from zero, what do you study first? (Zain)</h4>
+              <p>Learn n8n (the automation layer) and Claude Code (how you actually build and integrate AI). Watch Nick Sarav's YouTube — he has a 6-hour n8n course and a 4-hour Claude Code course. Both are linked in the Discord. APIs and JSON will make sense as you go — you don't need to study them separately first.</p>
+            </div>
+          </div>
+
+          <div class="recap-step">
+            <div class="recap-step-dot"></div>
+            <div>
+              <h4>What's a good first project to build? (Zain)</h4>
+              <p>An email summarizer. Build a workflow in n8n that reads your email, uses AI to summarize it, and sends that summary to a Discord channel. That's Mason's "AI Insights" channel that fires every morning. It reads, summarizes, and sends — completely automated. Simple, real, and proves the concept.</p>
+            </div>
+          </div>
+
+          <div class="recap-step">
+            <div class="recap-step-dot"></div>
+            <div>
+              <h4>What industries and niches work best?</h4>
+              <p>Service-based businesses that aren't going anywhere — HVAC, roofing, plumbing, Medicare, auto detailing, home services. Look for businesses that run on leads, speed, and repeat customers. They spend money on marketing to get leads and then lose those leads to slow response times. That's your entry point.</p>
+            </div>
+          </div>
+
+          <div class="recap-step">
+            <div class="recap-step-dot"></div>
+            <div>
+              <h4>How do you handle client dashboards? (Basil)</h4>
+              <p>Mason builds live HTML dashboards hosted on Railway. Shows the client what's being built, current progress (0/5 systems complete, etc.), notes, and time frames. All built in Claude or Claude Code, pushed to Railway, client gets a link. Real-time updates — Mason just edits it as he goes and it reflects live on the client's end.</p>
+            </div>
+          </div>
+
+          <div class="recap-step">
+            <div class="recap-step-dot"></div>
+            <div>
+              <h4>What does AI voice agent actually sound like to the customer? (Billy)</h4>
+              <p>Like a human. It has a custom prompt, set tone, and full conversation logic. It can answer FAQs, give quotes, book directly to the calendar, and if it doesn't know something — it transfers the call or says "I'll have someone call you back." 24/7. Never sick. No unanswered calls.</p>
+            </div>
+          </div>
+
+          <div class="recap-step">
+            <div class="recap-step-dot"></div>
+            <div>
+              <h4>Is doing marketing + automation a good package to sell?</h4>
+              <p>Yes — but get really good at one before you add the other. Marketing gets them in the door, automation keeps them. The risk is being mid at both. If you're going to package it, learn both properly first. Offer the second service for free to existing clients to test it, then upsell as you go.</p>
+            </div>
+          </div>
+
+          <div class="recap-step" style="border-bottom:none;padding-bottom:0;">
+            <div class="recap-step-dot"></div>
+            <div>
+              <h4>How do you get hired with zero sales experience? (Tecee)</h4>
+              <p>Mason doesn't need you to have experience — he has a training system. You go through the modules (offer stack, who we sell to, why we do it), pass a mock call with Mason, then get access to the CRM with real leads. He prefers teaching people fresh so the knowledge is clean and specific to AI automation.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- NEXT STEPS -->
+      <div class="recap-section">
+        <div class="recap-section-label">Your Next Steps</div>
+        <div class="recap-grid-3">
+          <div class="recap-action-card c1">
+            <div class="recap-action-num">01</div>
+            <h4>Watch Nick Sarav</h4>
+            <p>n8n course (6hrs) + Claude Code course (4hrs). Both linked in the Discord. This is the foundation. Watch these before anything else.</p>
+          </div>
+          <div class="recap-action-card c2">
+            <div class="recap-action-num">02</div>
+            <h4>Pick Your Lane</h4>
+            <p>Sales, Development, or Founder. Be honest with yourself about who you are and what your life allows. Then go all in on that one skill.</p>
+          </div>
+          <div class="recap-action-card c3">
+            <div class="recap-action-num">03</div>
+            <h4>DM Mason</h4>
+            <p>Ready to get in? Send a DM in the Discord or text directly. Mason does 1-on-1 onboarding. If you're hungry, he'll make time.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESOURCES -->
+      <div class="recap-section" style="margin-bottom:0;">
+        <div class="recap-section-label">Resources</div>
+        <div class="recap-resource-row">
+          <div class="recap-resource">
+            <div class="recap-resource-label">Discord</div>
+            <div class="recap-resource-val">A1 Alliance — AI Insights channel fires every morning</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /recap-body -->
+  </div><!-- /recap-modal-inner -->
+</div><!-- /recapModal -->
+
+<style>
+  /* ── RECAP BUTTON ── */
+  .recap-btn {
+    display:inline-flex;align-items:center;gap:12px;
+    font-family:var(--mono);font-size:13px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--cyan);
+    background:rgba(94,234,212,0.05);
+    border:1px solid rgba(94,234,212,0.3);
+    border-radius:10px;padding:14px 24px;cursor:pointer;
+    transition:background .25s,border-color .25s,box-shadow .25s,transform .2s;
+  }
+  .recap-btn:hover {
+    background:rgba(94,234,212,0.10);
+    border-color:rgba(94,234,212,0.6);
+    box-shadow:0 0 20px rgba(94,234,212,0.15);
+    transform:translateY(-1px);
+  }
+  .recap-btn-arrow { transition:transform .2s; }
+  .recap-btn:hover .recap-btn-arrow { transform:translateX(4px); }
+
+  /* ── MODAL OVERLAY ── */
+  .recap-modal {
+    position:fixed;inset:0;z-index:999;
+    background:rgba(7,7,13,0.0);
+    display:flex;align-items:stretch;justify-content:center;
+    opacity:0;visibility:hidden;
+    transition:opacity .45s cubic-bezier(0.4,0,0.2,1),
+                background .45s cubic-bezier(0.4,0,0.2,1),
+                visibility .45s;
+  }
+  .recap-modal.open {
+    opacity:1;visibility:visible;
+    background:rgba(7,7,13,0.92);
+  }
+  .recap-modal-inner {
+    width:100%;max-width:1100px;
+    display:flex;flex-direction:column;
+    background:var(--bg-0);
+    border-left:1px solid var(--edge);border-right:1px solid var(--edge);
+    transform:scale(0.96) translateY(16px);
+    transition:transform .45s cubic-bezier(0.4,0,0.2,1);
+    position:relative;overflow:hidden;
+  }
+  .recap-modal.open .recap-modal-inner {
+    transform:scale(1) translateY(0);
+  }
+  /* subtle orb inside modal */
+  .recap-modal-inner::before {
+    content:'';position:absolute;top:-120px;right:-80px;
+    width:400px;height:400px;border-radius:50%;
+    background:radial-gradient(circle,rgba(79,107,255,0.08),transparent 70%);
+    pointer-events:none;
+  }
+  .recap-modal-inner::after {
+    content:'';position:absolute;bottom:-100px;left:-60px;
+    width:320px;height:320px;border-radius:50%;
+    background:radial-gradient(circle,rgba(139,92,246,0.07),transparent 70%);
+    pointer-events:none;
+  }
+
+  /* ── MODAL HEADER ── */
+  .recap-header {
+    position:sticky;top:0;z-index:10;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:20px 40px;
+    background:rgba(7,7,13,0.95);
+    border-bottom:1px solid var(--edge);
+    backdrop-filter:blur(12px);
+  }
+  .recap-close {
+    font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--text-lo);background:none;border:1px solid var(--edge);
+    padding:8px 16px;border-radius:6px;cursor:pointer;
+    transition:color .2s,border-color .2s,background .2s;
+  }
+  .recap-close:hover { color:var(--text-hi);border-color:rgba(148,163,255,.4);background:rgba(255,255,255,0.04); }
+
+  /* ── MODAL BODY ── */
+  .recap-body {
+    flex:1;overflow-y:auto;padding:40px 40px 60px;
+    scrollbar-width:thin;scrollbar-color:rgba(148,163,255,0.15) transparent;
+  }
+  .recap-body::-webkit-scrollbar { width:4px; }
+  .recap-body::-webkit-scrollbar-track { background:transparent; }
+  .recap-body::-webkit-scrollbar-thumb { background:rgba(148,163,255,0.15);border-radius:2px; }
+
+  /* ── SECTION ── */
+  .recap-section { margin-bottom:44px; }
+  .recap-section-label {
+    font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--cyan);margin-bottom:18px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .recap-section-label::after { content:'';flex:1;height:1px;background:var(--edge); }
+
+  /* ── TAG ── */
+  .recap-tag {
+    font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+    color:var(--text-mid);background:rgba(255,255,255,0.04);
+    border:1px solid var(--edge);border-radius:5px;padding:5px 12px;
+  }
+
+  /* ── TAKEAWAY CARDS ── */
+  .recap-grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:14px; }
+  .recap-card {
+    background:linear-gradient(160deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01));
+    border:1px solid var(--edge);border-radius:12px;padding:20px;
+  }
+  .recap-card-num {
+    font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px;
+  }
+  .recap-card-num.cyan { color:var(--cyan); }
+  .recap-card-num.violet { color:var(--violet); }
+  .recap-card h4 { font-family:var(--disp);font-size:15px;font-weight:600;color:var(--text-hi);margin-bottom:7px;line-height:1.3; }
+  .recap-card p { font-size:13px;color:var(--text-mid);line-height:1.65; }
+
+  /* ── Q&A TRACK ── */
+  .recap-track { position:relative;padding-left:24px; }
+  .recap-track::before {
+    content:'';position:absolute;left:5px;top:6px;bottom:6px;width:2px;
+    background:linear-gradient(var(--blue),var(--violet));border-radius:2px;
+  }
+  .recap-step { position:relative;padding-bottom:22px; }
+  .recap-step:last-child { padding-bottom:0; }
+  .recap-step-dot {
+    position:absolute;left:-24px;top:4px;
+    width:12px;height:12px;border-radius:50%;
+    background:var(--bg-0);border:2px solid var(--cyan);
+  }
+  .recap-step h4 { font-family:var(--disp);font-size:15px;font-weight:600;color:var(--text-hi);margin-bottom:5px; }
+  .recap-step p { font-size:13px;color:var(--text-mid);line-height:1.65;max-width:74ch; }
+
+  /* ── ACTION CARDS ── */
+  .recap-grid-3 { display:grid;grid-template-columns:repeat(3,1fr);gap:14px; }
+  .recap-action-card {
+    border-radius:12px;padding:22px;
+    background:linear-gradient(160deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01));
+    border:1px solid var(--edge);position:relative;overflow:hidden;
+  }
+  .recap-action-card::before { content:'';position:absolute;top:0;left:0;right:0;height:2px; }
+  .recap-action-card.c1::before { background:linear-gradient(90deg,var(--cyan),var(--blue)); }
+  .recap-action-card.c2::before { background:linear-gradient(90deg,var(--blue),var(--violet)); }
+  .recap-action-card.c3::before { background:linear-gradient(90deg,var(--violet),var(--gold)); }
+  .recap-action-num { font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--text-lo);text-transform:uppercase;margin-bottom:10px; }
+  .recap-action-card h4 { font-family:var(--disp);font-size:16px;font-weight:700;color:var(--text-hi);margin-bottom:7px; }
+  .recap-action-card p { font-size:12px;color:var(--text-mid);line-height:1.6; }
+
+  /* ── RESOURCES ── */
+  .recap-resource-row { display:flex;flex-direction:column;gap:0; }
+  .recap-resource {
+    display:flex;align-items:flex-start;gap:24px;
+    padding:13px 0;border-bottom:1px solid var(--edge);
+  }
+  .recap-resource:last-child { border-bottom:none; }
+  .recap-resource-label {
+    font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--text-lo);min-width:110px;margin-top:2px;
+  }
+  .recap-resource-val { font-size:14px;color:var(--text-mid);line-height:1.55; }
+  .recap-resource-val a { color:var(--cyan);text-decoration:none; }
+  .recap-resource-val a:hover { text-decoration:underline; }
+</style>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const dotsWrap = document.getElementById('dots');
+  const progressTop = document.getElementById('progressTop');
+  let idx = 0;
+
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' on' : '');
+    d.addEventListener('click', () => go(i));
+    dotsWrap.appendChild(d);
+  });
+  const dots = document.querySelectorAll('.dot');
+
+  function resetStagger(slide){
+    slide.querySelectorAll('.stagger>*, .eyebrow, h1, .lede').forEach(el => {
+      el.style.animation = 'none';
+      void el.offsetWidth;
+      el.style.animation = '';
+    });
+  }
+
+  function go(n){
+    if(n < 0 || n >= slides.length) return;
+    slides[idx].classList.remove('active');
+    idx = n;
+    const s = slides[idx];
+    resetStagger(s);
+    s.classList.add('active');
+    dots.forEach((d,i) => d.classList.toggle('on', i === idx));
+    progressTop.style.width = ((idx + 1) / slides.length * 100) + '%';
+  }
+
+  document.getElementById('nextBtn').addEventListener('click', () => go(idx + 1));
+  document.getElementById('prevBtn').addEventListener('click', () => go(idx - 1));
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape') closeRecap();
+    if(recapModal.classList.contains('open')) return;
+    if(e.key === 'ArrowRight' || e.key === ' ') go(idx + 1);
+    if(e.key === 'ArrowLeft') go(idx - 1);
+  });
+
+  let touchX = 0;
+  document.addEventListener('touchstart', e => touchX = e.touches[0].clientX);
+  document.addEventListener('touchend', e => {
+    if(recapModal.classList.contains('open')) return;
+    const dx = e.changedTouches[0].clientX - touchX;
+    if(dx > 50) go(idx - 1);
+    if(dx < -50) go(idx + 1);
+  });
+
+  /* ── MODAL ── */
+  const recapModal = document.getElementById('recapModal');
+
+  function openRecap(){
+    recapModal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeRecap(){
+    recapModal.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  recapModal.addEventListener('click', e => {
+    if(e.target === recapModal) closeRecap();
+  });
+</script>
+</body>
+</html>
