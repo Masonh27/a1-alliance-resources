@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A1 Alliance — Starting From Zero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07070d; --panel:#0f1020; --panel2:#161828; --surface:#1c1e30;
+  --edge:rgba(148,163,255,0.13);
+  --blue:#4f6bff; --violet:#8b5cf6; --cyan:#5eead4;
+  --gold:#fbbf24; --green:#34d399; --red:#f87171; --orange:#fb923c;
+  --text:#f3f4fb; --mid:#a9adc9; --lo:#6b6f8f;
+  --mono:'JetBrains Mono',monospace;
+  --disp:'Space Grotesk',sans-serif;
+  --body:'Inter',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;background:var(--bg);overflow:hidden;}
+body{font-family:var(--body);color:var(--text);-webkit-font-smoothing:antialiased;}
+
+/* AMBIENT */
+.field{position:fixed;inset:0;z-index:0;overflow:hidden;}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);}
+.o1{width:600px;height:600px;background:var(--blue);opacity:.22;top:-150px;left:-120px;animation:d1 24s ease-in-out infinite;}
+.o2{width:500px;height:500px;background:var(--violet);opacity:.18;bottom:-120px;right:-100px;animation:d2 28s ease-in-out infinite;}
+.o3{width:280px;height:280px;background:var(--cyan);opacity:.09;top:45%;left:58%;animation:d3 32s ease-in-out infinite;}
+@keyframes d1{0%,100%{transform:translate(0,0)}50%{transform:translate(70px,90px)}}
+@keyframes d2{0%,100%{transform:translate(0,0)}50%{transform:translate(-80px,-60px)}}
+@keyframes d3{0%,100%{transform:translate(0,0)}50%{transform:translate(-50px,70px)}}
+.grid{position:absolute;inset:0;
+  background-image:linear-gradient(rgba(148,163,255,0.04) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(148,163,255,0.04) 1px,transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(ellipse at 50% 40%,black 0%,transparent 72%);}
+
+/* DECK */
+.deck{position:relative;z-index:2;height:100vh;width:100vw;}
+.slide{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  justify-content:center;padding:7vh 9vw;
+  opacity:0;visibility:hidden;transform:translateY(20px);
+  transition:opacity .55s ease,transform .55s ease,visibility .55s;
+}
+.slide.active{opacity:1;visibility:visible;transform:translateY(0);}
+
+/* TOP BAR */
+.topbar{position:fixed;top:0;left:0;right:0;height:48px;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;background:rgba(7,7,13,.85);border-bottom:1px solid var(--edge);
+  backdrop-filter:blur(12px);}
+.brand{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--lo);}
+.brand b{color:var(--cyan);}
+.slide-name{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--lo);}
+.progress-top{position:fixed;top:0;left:0;height:2px;z-index:200;
+  background:linear-gradient(90deg,var(--blue),var(--violet),var(--cyan));
+  transition:width .5s ease;}
+
+/* TYPE */
+.ey{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--cyan);display:flex;align-items:center;gap:10px;margin-bottom:20px;
+  opacity:0;animation:up .6s ease forwards;animation-delay:.08s;}
+.ey::before{content:'';width:24px;height:1px;background:var(--cyan);}
+.ey.vl{color:var(--violet);} .ey.vl::before{background:var(--violet);}
+.ey.gd{color:var(--gold);}   .ey.gd::before{background:var(--gold);}
+.ey.gn{color:var(--green);}  .ey.gn::before{background:var(--green);}
+.ey.or{color:var(--orange);} .ey.or::before{background:var(--orange);}
+
+h1{font-family:var(--disp);font-weight:700;line-height:1.02;letter-spacing:-.02em;
+  font-size:clamp(36px,5.2vw,70px);
+  background:linear-gradient(120deg,#fff 18%,#c9cdff 52%,#8b9cff 88%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  max-width:20ch;opacity:0;animation:up .7s ease forwards;animation-delay:.18s;}
+.sub{font-family:var(--disp);font-size:clamp(16px,1.8vw,22px);font-weight:500;
+  color:var(--mid);margin-top:14px;max-width:52ch;line-height:1.45;
+  opacity:0;animation:up .6s ease forwards;animation-delay:.28s;}
+.body{font-size:15px;color:var(--mid);max-width:58ch;line-height:1.72;margin-top:18px;
+  opacity:0;animation:up .6s ease forwards;animation-delay:.34s;}
+@keyframes up{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+/* STAGGER */
+.sg>*{opacity:0;transform:translateY(14px);animation:up .5s ease forwards;}
+.sg>*:nth-child(1){animation-delay:.38s}.sg>*:nth-child(2){animation-delay:.48s}
+.sg>*:nth-child(3){animation-delay:.58s}.sg>*:nth-child(4){animation-delay:.68s}
+.sg>*:nth-child(5){animation-delay:.78s}.sg>*:nth-child(6){animation-delay:.88s}
+
+/* CARDS */
+.cards{display:grid;gap:14px;margin-top:26px;}
+.g2{grid-template-columns:1fr 1fr;}
+.g3{grid-template-columns:1fr 1fr 1fr;}
+.card{
+  background:linear-gradient(160deg,rgba(255,255,255,.04),rgba(255,255,255,.01));
+  border:1px solid var(--edge);border-radius:14px;padding:22px;position:relative;overflow:hidden;
+}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(94,234,212,.3),transparent);}
+.card.vl::before{background:linear-gradient(90deg,transparent,rgba(139,92,246,.3),transparent);}
+.card.gd::before{background:linear-gradient(90deg,transparent,rgba(251,191,36,.3),transparent);}
+.card.gn::before{background:linear-gradient(90deg,transparent,rgba(52,211,153,.3),transparent);}
+.card.or::before{background:linear-gradient(90deg,transparent,rgba(251,146,60,.3),transparent);}
+.card.rd::before{background:linear-gradient(90deg,transparent,rgba(248,113,113,.3),transparent);}
+.ctag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--cyan);margin-bottom:10px;display:block;}
+.card.vl .ctag{color:var(--violet);}.card.gd .ctag{color:var(--gold);}
+.card.gn .ctag{color:var(--green);}.card.or .ctag{color:var(--orange);}
+.card.rd .ctag{color:var(--red);}
+.card h3{font-family:var(--disp);font-size:17px;font-weight:600;color:var(--text);margin-bottom:7px;}
+.card p{font-size:13px;color:var(--mid);line-height:1.62;}
+.card .note{font-family:var(--mono);font-size:11px;color:var(--cyan);margin-top:10px;font-style:italic;}
+.card.vl .note{color:var(--violet);}.card.gd .note{color:var(--gold);}
+.card.gn .note{color:var(--green);}.card.or .note{color:var(--orange);}
+
+/* QUOTE / HIGHLIGHT BOX */
+.qbox{
+  margin-top:22px;border-left:3px solid var(--cyan);
+  padding:16px 20px;background:rgba(94,234,212,.04);
+  border-radius:0 10px 10px 0;max-width:700px;
+  opacity:0;animation:up .6s ease forwards;animation-delay:.5s;
+}
+.qbox p{font-size:15px;color:var(--text);line-height:1.7;font-style:italic;}
+.qbox.vl{border-color:var(--violet);background:rgba(139,92,246,.04);}
+.qbox.gd{border-color:var(--gold);background:rgba(251,191,36,.04);}
+.qbox.gn{border-color:var(--green);background:rgba(52,211,153,.04);}
+
+/* PRINCIPLE ROW */
+.prow{display:flex;align-items:flex-start;gap:16px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+.prow:last-child{border-bottom:none;}
+.pnum{font-family:var(--disp);font-size:22px;font-weight:700;color:var(--blue);
+  min-width:36px;line-height:1;margin-top:2px;flex-shrink:0;}
+.prow.vl .pnum{color:var(--violet);}.prow.gd .pnum{color:var(--gold);}
+.prow.gn .pnum{color:var(--green);}.prow.or .pnum{color:var(--orange);}
+.prow h4{font-family:var(--disp);font-size:16px;font-weight:600;color:var(--text);margin-bottom:4px;}
+.prow p{font-size:13px;color:var(--mid);line-height:1.6;}
+
+/* STEP TRACK */
+.track{position:relative;padding-left:28px;margin-top:22px;max-width:720px;}
+.track::before{content:'';position:absolute;left:5px;top:6px;bottom:6px;width:2px;
+  background:linear-gradient(var(--blue),var(--violet),var(--cyan));border-radius:2px;}
+.tstep{position:relative;padding-bottom:20px;}
+.tstep:last-child{padding-bottom:0;}
+.tstep::before{content:'';position:absolute;left:-28px;top:5px;
+  width:12px;height:12px;border-radius:50%;background:var(--bg);border:2px solid var(--cyan);}
+.tstep:nth-child(2)::before{border-color:var(--violet);}
+.tstep:nth-child(3)::before{border-color:var(--green);}
+.tstep:nth-child(4)::before{border-color:var(--gold);}
+.tstep:nth-child(5)::before{border-color:var(--orange);}
+.ttag{display:inline-block;margin-bottom:5px;font-family:var(--mono);font-size:10px;
+  letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:100px;
+  color:var(--blue);background:rgba(79,107,255,.08);border:1px solid rgba(79,107,255,.2);}
+.tstep:nth-child(2) .ttag{color:var(--violet);background:rgba(139,92,246,.08);border-color:rgba(139,92,246,.2);}
+.tstep:nth-child(3) .ttag{color:var(--green);background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.2);}
+.tstep:nth-child(4) .ttag{color:var(--gold);background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.2);}
+.tstep:nth-child(5) .ttag{color:var(--orange);background:rgba(251,146,60,.08);border-color:rgba(251,146,60,.2);}
+.tstep h4{font-family:var(--disp);font-size:17px;font-weight:600;color:var(--text);margin-bottom:4px;}
+.tstep p{font-size:13px;color:var(--mid);line-height:1.55;}
+
+/* PILL ROW */
+.pills{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;
+  opacity:0;animation:up .6s ease forwards;animation-delay:.44s;}
+.pill{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;
+  color:var(--mid);border:1px solid var(--edge);padding:8px 16px;
+  border-radius:999px;background:rgba(255,255,255,.02);}
+.pill b{color:var(--text);}
+
+/* SPLIT LAYOUT */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start;
+  margin-top:24px;width:100%;max-width:1020px;}
+
+/* BIG STAT */
+.bstat{text-align:center;padding:20px;}
+.bstat .n{font-family:var(--disp);font-size:clamp(40px,5vw,64px);font-weight:700;
+  color:var(--cyan);line-height:1;}
+.bstat.vl .n{color:var(--violet);}.bstat.gd .n{color:var(--gold);}
+.bstat p{font-size:12px;color:var(--mid);margin-top:8px;line-height:1.5;font-family:var(--mono);}
+
+/* NAV */
+.nav{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:100;
+  display:flex;align-items:center;gap:14px;
+  background:rgba(15,16,32,.92);border:1px solid var(--edge);
+  border-radius:100px;padding:9px 22px;backdrop-filter:blur(12px);}
+.nbtn{background:none;border:none;color:var(--lo);cursor:pointer;
+  font-size:16px;padding:4px 10px;border-radius:6px;
+  transition:color .2s,background .2s;font-family:var(--mono);}
+.nbtn:hover{color:var(--cyan);background:rgba(94,234,212,.08);}
+.nbtn:disabled{opacity:.2;cursor:not-allowed;}
+.ndots{display:flex;gap:5px;align-items:center;}
+.ndot{width:5px;height:5px;border-radius:50%;background:var(--lo);opacity:.3;transition:all .3s;cursor:pointer;}
+.ndot.on{background:var(--cyan);opacity:1;width:18px;border-radius:3px;}
+.ncnt{font-family:var(--mono);font-size:11px;color:var(--lo);letter-spacing:.12em;min-width:44px;text-align:center;}
+::selection{background:rgba(139,92,246,.4);}
+</style>
+</head>
+<body>
+<div class="field">
+  <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+  <div class="grid"></div>
+</div>
+
+<div class="progress-top" id="pt"></div>
+<div class="topbar">
+  <div class="brand">A1 <b>Alliance</b></div>
+  <span class="slide-name" id="sn">Starting From Zero</span>
+  <span style="font-family:var(--mono);font-size:10px;color:var(--lo);">← → to navigate</span>
+</div>
+
+<div class="nav">
+  <button class="nbtn" id="pb" onclick="go(-1)" disabled>←</button>
+  <div class="ndots" id="nd"></div>
+  <span class="ncnt" id="nc"></span>
+  <button class="nbtn" id="nb" onclick="go(1)">→</button>
+</div>
+
+<div class="deck">
+
+<!-- ══ 1 — WELCOME ══ -->
+<section class="slide active" data-title="Welcome">
+  <div class="ey">A1 Alliance — Group Session</div>
+  <h1>Starting From Zero.</h1>
+  <p class="sub">No capital. No background. No idea where to begin.<br>This session answers the one question that matters most right now.</p>
+  <div class="qbox" style="animation-delay:.42s;">
+    <p>"How do I actually start in AI automation — from nothing?"</p>
+  </div>
+  <div class="pills">
+    <div class="pill">📍 <b>A1 Alliance Community</b></div>
+    <div class="pill">🗓 <b>August 2026</b></div>
+    <div class="pill">🎯 <b>Business Only — No Tech Jargon</b></div>
+  </div>
+</section>
+
+<!-- ══ 2 — WHAT IS AI AUTOMATION ══ -->
+<section class="slide" data-title="What Is AI Automation">
+  <div class="ey">Foundation</div>
+  <h1 style="font-size:clamp(30px,4vw,54px);">What is automation — and what makes AI automation different?</h1>
+  <div class="split">
+    <div>
+      <p class="sub" style="margin-top:0;font-size:15px;opacity:0;animation:up .6s ease forwards;animation-delay:.28s;">This is a real skill. Not a shortcut. Not a trend. A skill you build — and the earlier you build it, the further ahead you are.</p>
+      <div class="qbox" style="margin-top:18px;animation-delay:.44s;">
+        <p><b style="color:var(--text);">Regular automation:</b> You set the rule. If A happens, B follows. Every time. No exceptions. Predictable input, predictable output.</p>
+      </div>
+      <div class="qbox vl" style="margin-top:10px;animation-delay:.56s;">
+        <p><b style="color:var(--text);">AI automation:</b> The system thinks. A, B, C, D, or E goes in — and it adapts. The output is dynamic, intelligent, and changes based on context. That's the difference.</p>
+      </div>
+    </div>
+    <div class="cards" style="margin-top:0;" >
+      <div class="card sg">
+        <span class="ctag">Regular Automation</span>
+        <h3>Predictable. Fixed. Rule-based.</h3>
+        <p>If someone fills out a form, they get an email. Always the same email. This is useful — but it doesn't think. You set it. It does it. Nothing more.</p>
+        <div class="note">Input A → Output B. Every time.</div>
+      </div>
+      <div class="card vl sg">
+        <span class="ctag">AI Automation</span>
+        <h3>Dynamic. Adaptive. Intelligent.</h3>
+        <p>If someone calls after hours, the AI answers — and its response changes based on what the caller says, what they need, and how the conversation flows. It listens and adapts.</p>
+        <div class="note">Input A → Output could be B, C, D, or F.</div>
+      </div>
+      <div class="card gn sg">
+        <span class="ctag">The Bottom Line</span>
+        <h3>It's infrastructure — not software.</h3>
+        <p>AI automation is not an app you buy. It's a system you build around a real business problem. That's why businesses pay for it — and why it's a skill worth learning.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 3 — WHY NOW ══ -->
+<section class="slide" data-title="Why Now">
+  <div class="ey">The Window</div>
+  <h1 style="font-size:clamp(30px,4vw,54px);">Why right now is the best time to start. Not next year. Now.</h1>
+  <div class="split">
+    <div>
+      <div class="cards g3" style="margin-top:4px;">
+        <div class="card bstat sg"><div class="n">87%</div><p>of small business owners have no idea what AI can do for their business</p></div>
+        <div class="card bstat vl sg"><div class="n" style="color:var(--violet);">$X</div><p>first movers in every industry always build the advantage late movers spend years trying to close</p></div>
+        <div class="card bstat gd sg"><div class="n" style="color:var(--gold);">Now</div><p>the gap between knowing this and acting on it is the entire opportunity</p></div>
+      </div>
+      <div class="qbox gd" style="margin-top:18px;animation-delay:.7s;">
+        <p>Every single business I've spoken to — they've heard of AI. Almost none of them have done anything about it. <b style="color:var(--text);">That gap is where you live.</b></p>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:4px;" class="sg">
+      <div class="card or">
+        <span class="ctag">The Skill Window Is Open</span>
+        <h3>Learning this now = being ahead in 2 years.</h3>
+        <p>The businesses adopting AI automation right now are building operational advantages that competitors will spend years trying to replicate. The people building those systems are the ones who started early.</p>
+      </div>
+      <div class="card gn">
+        <span class="ctag">No Gatekeeping</span>
+        <h3>You don't need a degree. You need to start.</h3>
+        <p>This space rewards builders and sellers who move fast and solve real problems. A 19-year-old who can identify a business bottleneck and automate it is worth more than someone with a CS degree who's never shipped a real solution.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 4 — STARTING FROM ZERO ══ -->
+<section class="slide" data-title="Starting From Zero">
+  <div class="ey gd">If I Had Nothing</div>
+  <h1 style="font-size:clamp(28px,3.8vw,52px);max-width:22ch;">What I would actually do if I started from zero today.</h1>
+  <p class="sub" style="font-size:14px;">No money. No connections. No idea what to build. Here's the honest answer.</p>
+  <div class="track">
+    <div class="tstep">
+      <span class="ttag">Step 01 — Day 1</span>
+      <h4>Pick your lane immediately.</h4>
+      <p>Sales, Development, or Founder. You cannot do all three at once from zero. Pick the one that fits who you are right now. If you're good with people — Sales. If you're analytical and patient — Development. If you want to build a business — Founder. Decide. Move.</p>
+    </div>
+    <div class="tstep">
+      <span class="ttag">Step 02 — Week 1</span>
+      <h4>Learn the skill — not the concept. The actual skill.</h4>
+      <p>For sales: Study the framework. Practice cold calls. Record yourself. Watch what works. For development: Open n8n and Claude Code. Build something that runs. Not a tutorial. An actual automation that does something real. Don't watch. Build.</p>
+    </div>
+    <div class="tstep">
+      <span class="ttag">Step 03 — Week 2–3</span>
+      <h4>Find your first real problem to solve.</h4>
+      <p>Go talk to a business owner you know. Ask them what's costing them the most time or money right now. Don't pitch anything. Just listen. The problem they describe is your first build target. Or your first discovery call. Either way — it starts with a real business, not a hypothetical.</p>
+    </div>
+    <div class="tstep">
+      <span class="ttag">Step 04 — Month 1</span>
+      <h4>Get your first result — even for free.</h4>
+      <p>Your first client or your first build doesn't have to pay you. It has to prove the concept. One real result — time saved, revenue recovered, a problem actually fixed — is worth more than any certification. That result becomes your case study. Your case study becomes your sales tool.</p>
+    </div>
+    <div class="tstep">
+      <span class="ttag">Step 05 — Month 2+</span>
+      <h4>Now charge. Now scale. Now compound.</h4>
+      <p>Once you have one result, you have proof. Proof converts. You charge for the next one. You raise the price after that. You don't need ten case studies. You need one. Go get it.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 5 — THREE WAYS TO MAKE MONEY ══ -->
+<section class="slide" data-title="Three Ways to Make Money">
+  <div class="ey">The Money</div>
+  <h1 style="font-size:clamp(28px,3.8vw,52px);">Three ways to make real money in AI automation.</h1>
+  <p class="sub" style="font-size:14px;">Different paths. Different skill sets. All of them work — but only if you go all in on one.</p>
+  <div class="cards g3 sg" style="margin-top:22px;">
+    <div class="card">
+      <span class="ctag">Path 01 — Sales</span>
+      <h3>The Closer</h3>
+      <p>You find businesses that need this. You have the conversation. You identify the problem. You book the call, you close the deal, you hand it off to the developer. You never need to build anything. Your skill is people — and that skill scales.</p>
+      <div class="note">No technical background required. Pure performance income.</div>
+    </div>
+    <div class="card vl">
+      <span class="ctag">Path 02 — Development</span>
+      <h3>The Builder</h3>
+      <p>You build the systems. You learn n8n, Claude Code, and how to automate real business processes. Every deal a sales rep closes lands on your desk. You build it, you maintain it, you earn on it monthly. The income compounds as your client base grows.</p>
+      <div class="note">Project fees + monthly maintenance. Income stacks over time.</div>
+    </div>
+    <div class="card gd">
+      <span class="ctag">Path 03 — Founder</span>
+      <h3>The Operator</h3>
+      <p>You build the machine. You hire the sellers and the builders. You manage client relationships and delivery. Every deal your team closes flows through you. Highest ceiling — highest demand on your time and discipline. This is the long game.</p>
+      <div class="note">Recurring revenue base + team commissions. Built to scale.</div>
+    </div>
+  </div>
+  <div class="qbox" style="margin-top:18px;animation-delay:.9s;">
+    <p>You can start in Sales or Development with no money. You can start as a Founder for under $100/month in tools. The barrier to entry in this space is skill and execution — not capital.</p>
+  </div>
+</section>
+
+<!-- ══ 6 — MASTER GUIDE TO SALES ══ -->
+<section class="slide" data-title="The Sales Master Guide">
+  <div class="ey">Path 01 — Sales</div>
+  <h1 style="font-size:clamp(26px,3.4vw,48px);max-width:24ch;">The master guide to selling AI automation.</h1>
+  <div class="split">
+    <div style="display:flex;flex-direction:column;gap:0;max-width:480px;">
+      <div class="prow sg">
+        <div class="pnum">01</div>
+        <div><h4>Sell yourself — not the service.</h4>
+        <p>You're not selling AI. You're selling a partnership. You're the person they call when something's wrong. You're the weekly check-in. 87% of business owners don't know what AI can do for them — so you're not pitching a product. You're building trust.</p></div>
+      </div>
+      <div class="prow vl sg">
+        <div class="pnum" style="color:var(--violet);">02</div>
+        <div><h4>KISS — time and money only.</h4>
+        <p>No API talk. No webhooks. No tech stack. Business owners care about two things: time saved and money recovered. Every sentence you say connects to one of those two things. That's the entire filter.</p></div>
+      </div>
+      <div class="prow sg">
+        <div class="pnum">03</div>
+        <div><h4>Output only. Never the system.</h4>
+        <p>Don't explain how the voice agent works. Explain that they'll never miss a call again. Don't explain the nurturing system. Explain that their clients will never forget about them. Outcome. Always outcome.</p></div>
+      </div>
+      <div class="prow vl sg">
+        <div class="pnum" style="color:var(--violet);">04</div>
+        <div><h4>70/30 rule — you talk less.</h4>
+        <p>They talk 70% of the time. You talk 30%. The person asking the right questions controls the conversation. Ask. Shut up. Listen. The answer they give you is your close.</p></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div class="card" style="margin-top:0;">
+        <span class="ctag">The 3-Stage Framework</span>
+        <h3>Cold Call → Discovery → Solution</h3>
+        <p><b style="color:var(--cyan);">Cold Call:</b> One goal only — book the discovery call. Don't explain anything.<br>
+        <b style="color:var(--violet);">Discovery:</b> Find the one problem worth solving. Ask, listen, quantify the pain.<br>
+        <b style="color:var(--green);">Solution:</b> Present what they get — in outcomes only. State the price. Stop talking.</p>
+      </div>
+      <div class="card gd">
+        <span class="ctag">Agree, Align, Overcome</span>
+        <h3>Handle every objection with this.</h3>
+        <p><b style="color:var(--gold);">Agree</b> — validate what they said. Never fight it.<br>
+        <b style="color:var(--gold);">Align</b> — find common ground. "A lot of businesses we work with felt the same way."<br>
+        <b style="color:var(--gold);">Overcome</b> — reframe toward the outcome. Keep moving forward.</p>
+        <div class="note">"Is there a reason you wouldn't want to save time and make more money?"</div>
+      </div>
+      <div class="card rd">
+        <span class="ctag">The Price Rule</span>
+        <h3>State it. Stop talking. First to speak loses.</h3>
+        <p>State the investment clearly and confidently. Then go completely silent. Do not fill the pause. The first person to talk after the price is named loses the negotiation. Assume the sale before they say yes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 7 — MASTER GUIDE TO DEVELOPMENT ══ -->
+<section class="slide" data-title="The Development Master Guide">
+  <div class="ey vl">Path 02 — Development</div>
+  <h1 style="font-size:clamp(26px,3.4vw,48px);max-width:22ch;">The master guide to developing AI automation.</h1>
+  <div class="split">
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div class="card vl" style="margin-top:0;">
+        <span class="ctag">What You're Actually Doing</span>
+        <h3>Solving real business problems with automation.</h3>
+        <p>Not building apps. Not writing software for its own sake. You identify the exact operational bottleneck costing a business the most — in time or revenue — and you build the system that removes it. The tech is the vehicle. The business problem is the point.</p>
+      </div>
+      <div class="card sg">
+        <span class="ctag">The Core Tool Stack — Start Here</span>
+        <h3>These are the tools. Learn them in this order.</h3>
+        <p><b style="color:var(--cyan);">n8n</b> — your automation engine. Where workflows live and fire.<br>
+        <b style="color:var(--violet);">Claude Code</b> — AI-assisted building. Write, test, and fix logic faster.<br>
+        <b style="color:var(--gold);">Make.com</b> — alternative workflow platform. Good for certain integrations.<br>
+        <b style="color:var(--green);">VAPI</b> — voice agents. AI that answers phones and sounds human.<br>
+        <b style="color:var(--orange);">APIs + Webhooks</b> — how systems talk to each other. You'll learn this by doing.</p>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:0;max-width:480px;">
+      <div class="prow vl sg">
+        <div class="pnum" style="color:var(--violet);">01</div>
+        <div><h4>Build something real on day one.</h4>
+        <p>Don't study theory. Open n8n. Build a workflow that actually does something — even if it's simple. An email summarizer. A form-to-Slack notification. Anything that runs. Learning by doing beats watching tutorials every time.</p></div>
+      </div>
+      <div class="prow sg">
+        <div class="pnum">02</div>
+        <div><h4>Understand the business before you build anything.</h4>
+        <p>The most common developer mistake: jumping into the build before understanding the problem. Get the pain point in writing. Know what success looks like for the client before you touch a single tool.</p></div>
+      </div>
+      <div class="prow vl sg">
+        <div class="pnum" style="color:var(--violet);">03</div>
+        <div><h4>Solve one problem completely before adding another.</h4>
+        <p>Scope creep kills builds. One system, fully functioning, properly tested, handed off clean. Then the next. Simple systems that work beat complex systems that don't ship.</p></div>
+      </div>
+      <div class="prow sg">
+        <div class="pnum">04</div>
+        <div><h4>Maintenance is where the real income lives.</h4>
+        <p>You build once. You maintain monthly. Stack 10 clients at $300/mo each = $3,000/mo in near-passive income on top of new build fees. The income compounds as the sales team closes more. The earlier you build the base, the faster it grows.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 8 — MASTER GUIDE TO FOUNDER ══ -->
+<section class="slide" data-title="The Founder Master Guide">
+  <div class="ey gd">Path 03 — Founder</div>
+  <h1 style="font-size:clamp(26px,3.4vw,48px);max-width:22ch;">The master guide to starting an AI automation agency from zero.</h1>
+  <div class="split">
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div class="card gd" style="margin-top:0;">
+        <span class="ctag">The Minimum Viable Business Plan</span>
+        <h3>You need these six things before anything else.</h3>
+        <p>
+          <b style="color:var(--gold);">① Business Name</b> — what are you called?<br>
+          <b style="color:var(--gold);">② ICP</b> — who specifically do you serve? (industry, revenue, size)<br>
+          <b style="color:var(--gold);">③ Offer</b> — what do you sell and what does it cost?<br>
+          <b style="color:var(--gold);">④ Outreach Plan</b> — how are you getting clients? (cold call, DMs, walk-ins)<br>
+          <b style="color:var(--gold);">⑤ Payment Method</b> — how do clients pay you? (Stripe, PayPal, invoice)<br>
+          <b style="color:var(--gold);">⑥ Delivery Plan</b> — who builds it? You, a dev, a partner?
+        </p>
+        <div class="note">You can map this out in one afternoon. No excuses.</div>
+      </div>
+      <div class="card or">
+        <span class="ctag">The Real Cost to Start</span>
+        <h3>Under $100/month. That's the barrier to entry.</h3>
+        <p>n8n Cloud — ~$24/mo. Claude API — ~$5–10/mo. Outreach — free. Cold calling — free. Your website — free to start (Carrd, Notion, GitHub Pages). The only thing stopping you is deciding to go.</p>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:0;max-width:480px;">
+      <div class="prow gd sg">
+        <div class="pnum" style="color:var(--gold);">01</div>
+        <div><h4>Learn to sell AND build before you hire anyone.</h4>
+        <p>You cannot manage what you haven't done. Before you bring on a sales rep, run the sales yourself. Before you hire a developer, understand what they're building. This is how you know when someone's doing it right — and when they're not.</p></div>
+      </div>
+      <div class="prow or sg">
+        <div class="pnum" style="color:var(--orange);">02</div>
+        <div><h4>Get your first 2–3 clients before building a team.</h4>
+        <p>Prove the process works. Get real results. Build a case study. Then bring in the team around a proven model. Hiring before you have proof wastes time and money you don't have.</p></div>
+      </div>
+      <div class="prow gd sg">
+        <div class="pnum" style="color:var(--gold);">03</div>
+        <div><h4>Recurring revenue is the foundation — not a bonus.</h4>
+        <p>Every client relationship should include a monthly retainer. Not just a project fee. Build recurring revenue into every deal from day one. Monthly retainers are what turn a freelance operation into an actual business.</p></div>
+      </div>
+      <div class="prow or sg">
+        <div class="pnum" style="color:var(--orange);">04</div>
+        <div><h4>Discipline is the real product.</h4>
+        <p>Organization, planning, and execution discipline are not soft skills. They are the operational foundation of every business that makes it past month three. The people who build real agencies are the ones who treat it like one from day one.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 9 — WHERE TO START ══ -->
+<section class="slide" data-title="Your First Move">
+  <div class="ey gn">Action</div>
+  <h1 style="font-size:clamp(28px,4vw,54px);">There's only one thing left to figure out.</h1>
+  <p class="sub">Every question has been answered. The path exists. The skill is learnable. The market is open. Now the only variable is you.</p>
+  <div class="qbox gn" style="animation-delay:.42s;">
+    <p>"The businesses that integrate AI automation right now are building the advantage that late movers will spend years trying to close. The window is open. The only question is whether you walk through it."</p>
+  </div>
+  <div class="cards g3 sg" style="margin-top:22px;">
+    <div class="card">
+      <span class="ctag">If You're Starting in Sales</span>
+      <h3>Pick up the phone this week.</h3>
+      <p>Study the framework. Practice the cold call out loud. Record yourself. Make your first 20 calls before you second-guess anything. You learn this by doing it — not by watching it.</p>
+    </div>
+    <div class="card vl">
+      <span class="ctag">If You're Starting in Development</span>
+      <h3>Open n8n today.</h3>
+      <p>Watch Nick Sarav's n8n course and Claude Code course. Build along — don't just watch. Build the email summarizer first. Then find a business problem. Then build that.</p>
+    </div>
+    <div class="card gd">
+      <span class="ctag">If You're Starting as a Founder</span>
+      <h3>Write your minimum viable plan today.</h3>
+      <p>Name. ICP. Offer. Outreach plan. Payment method. Delivery plan. Six things. One page. One afternoon. Then go get your first client. You don't need permission to start.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 10 — Q&A ══ -->
+<section class="slide" data-title="Open Floor — Q&A">
+  <div class="ey">Open Floor</div>
+  <h1 style="font-size:clamp(36px,5.2vw,68px);">Questions.</h1>
+  <p class="sub">We covered the foundation, the timing, the three paths, and exactly what to do first. Now it's your turn. Nothing is too basic. Ask it.</p>
+  <div class="qbox" style="animation-delay:.42s;">
+    <p>The whiteboard is next — we'll go deeper on whatever the room needs. Sales frameworks, build walkthroughs, founder structure — bring it.</p>
+  </div>
+  <div class="pills">
+    <div class="pill">💬 Drop it in the chat</div>
+    <div class="pill">🎙 Unmute and ask</div>
+    <div class="pill">📋 Whiteboard session after</div>
+  </div>
+</section>
+
+</div>
+
+<script>
+const slides=document.querySelectorAll('.slide'),total=slides.length;
+let cur=0;
+const nd=document.getElementById('nd');
+slides.forEach((_,i)=>{const d=document.createElement('div');d.className='ndot';d.onclick=()=>goTo(i);nd.appendChild(d);});
+const dots=document.querySelectorAll('.ndot');
+function goTo(i){
+  if(i<0||i>=total)return;
+  slides[cur].classList.remove('active'); cur=i;
+  slides[cur].classList.add('active');
+  dots.forEach((d,j)=>d.classList.toggle('on',j===cur));
+  document.getElementById('pt').style.width=((cur+1)/total*100)+'%';
+  document.getElementById('pb').disabled=cur===0;
+  document.getElementById('nb').disabled=cur===total-1;
+  document.getElementById('nc').textContent=(cur+1<10?'0'+(cur+1):cur+1)+' / '+(total<10?'0'+total:total);
+  document.getElementById('sn').textContent=slides[cur].dataset.title||'Starting From Zero';
+}
+function go(d){goTo(cur+d);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' ')go(1);
+  if(e.key==='ArrowLeft')go(-1);
+});
+goTo(0);
+</script>
+</body>
+</html>
