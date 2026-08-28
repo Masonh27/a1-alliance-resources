@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Starting From 0 — A1 Alliance</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F2EDE6;
+    --cream-dark: #E8E1D8;
+    --copper: #C49A6C;
+    --copper-dark: #A8804F;
+    --copper-light: #E8C99A;
+    --text: #1C1C1C;
+    --text-mid: #5a5a5a;
+    --text-muted: #9a9a9a;
+    --white: #ffffff;
+    --surface: #FAF7F3;
+    --border: rgba(196,154,108,0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    background: var(--cream);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+  }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--cream-dark);
+    z-index: 100;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--copper);
+    transition: width 0.5s ease;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    position: fixed;
+    top: 3px; left: 0; right: 0;
+    height: 56px;
+    background: var(--cream);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    z-index: 99;
+  }
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .topbar-logo {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+  .topbar-logo span { color: var(--copper); }
+  .topbar-session {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .topbar-slide-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+
+  /* DECK */
+  .deck {
+    position: fixed;
+    inset: 0;
+    padding-top: 59px;
+    padding-bottom: 72px;
+  }
+
+  /* SLIDES */
+  .slide {
+    position: absolute;
+    inset: 59px 0 72px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 10vw;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(40px);
+    transition: opacity 0.5s ease, transform 0.5s ease, visibility 0.5s;
+    overflow-y: auto;
+  }
+  .slide.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+  }
+  .slide.exit-left {
+    opacity: 0;
+    transform: translateX(-40px);
+    visibility: hidden;
+  }
+
+  /* SLIDE GHOST NUMBER */
+  .slide-ghost {
+    position: absolute;
+    right: 8vw;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: clamp(120px, 18vw, 220px);
+    font-weight: 800;
+    color: var(--cream-dark);
+    line-height: 1;
+    user-select: none;
+    pointer-events: none;
+    z-index: 0;
+    letter-spacing: -8px;
+  }
+
+  /* SLIDE CONTENT */
+  .slide-content {
+    position: relative;
+    z-index: 1;
+    max-width: 680px;
+    width: 100%;
+  }
+
+  .slide-eyebrow {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--copper);
+    font-weight: 600;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .slide-eyebrow::before {
+    content: '';
+    width: 24px;
+    height: 2px;
+    background: var(--copper);
+    display: inline-block;
+  }
+
+  .slide-title {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: clamp(32px, 5vw, 58px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -1.5px;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+  .slide-title .copper { color: var(--copper); }
+
+  .slide-sub {
+    font-size: 15px;
+    color: var(--text-mid);
+    line-height: 1.7;
+    margin-bottom: 28px;
+    max-width: 540px;
+  }
+
+  /* STAT CALLOUT */
+  .stat-block {
+    display: inline-flex;
+    flex-direction: column;
+    background: var(--text);
+    color: var(--cream);
+    border-radius: 12px;
+    padding: 20px 28px;
+    margin-bottom: 20px;
+  }
+  .stat-num {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--copper-light);
+    letter-spacing: -2px;
+  }
+  .stat-label {
+    font-size: 12px;
+    color: rgba(242,237,230,0.7);
+    margin-top: 4px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* LANE CARDS */
+  .lane-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 8px;
+    width: 100%;
+    max-width: 680px;
+  }
+  .lane-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    border-top: 3px solid var(--copper);
+  }
+  .lane-card h4 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+  .lane-card p {
+    font-size: 12px;
+    color: var(--text-mid);
+    line-height: 1.6;
+  }
+  .lane-badge {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--copper);
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  /* PHASE CARDS */
+  .phase-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 8px;
+    width: 100%;
+    max-width: 680px;
+  }
+  .phase-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .phase-card::before {
+    content: attr(data-phase);
+    position: absolute;
+    top: -10px;
+    right: 12px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 64px;
+    font-weight: 800;
+    color: var(--cream);
+    line-height: 1;
+  }
+  .phase-card h4 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--text);
+    position: relative;
+    z-index: 1;
+  }
+  .phase-card .phase-target {
+    font-size: 11px;
+    color: var(--copper);
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: block;
+    position: relative;
+    z-index: 1;
+  }
+  .phase-card p {
+    font-size: 12px;
+    color: var(--text-mid);
+    line-height: 1.6;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* TOOL STACK */
+  .tool-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 8px;
+    max-width: 500px;
+  }
+  .tool-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .tool-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--copper);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  .tool-card h5 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .tool-card p {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* NEXT STEPS */
+  .steps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+    max-width: 580px;
+  }
+  .step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+  }
+  .step-num {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--copper);
+    flex-shrink: 0;
+    line-height: 1.3;
+  }
+  .step-text h5 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .step-text p {
+    font-size: 12px;
+    color: var(--text-mid);
+    line-height: 1.5;
+  }
+
+  /* DROPDOWNS */
+  .dropdowns {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+    width: 100%;
+    max-width: 660px;
+  }
+  .dropdown {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .dropdown-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s;
+  }
+  .dropdown-trigger:hover { background: rgba(196,154,108,0.05); }
+  .dropdown-trigger h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .dropdown-arrow {
+    font-size: 12px;
+    color: var(--copper);
+    transition: transform 0.25s;
+    flex-shrink: 0;
+    margin-left: 12px;
+  }
+  .dropdown.open .dropdown-arrow { transform: rotate(180deg); }
+  .dropdown-body {
+    display: none;
+    padding: 0 18px 16px;
+    border-top: 1px solid var(--border);
+    border-left: 3px solid var(--copper);
+    margin: 0 18px 16px;
+    border-radius: 0 0 0 2px;
+  }
+  .dropdown.open .dropdown-body { display: block; }
+  .dropdown-body p {
+    font-size: 13px;
+    color: var(--text-mid);
+    line-height: 1.75;
+    margin-top: 12px;
+  }
+  .dropdown-body ul {
+    margin-top: 10px;
+    padding-left: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .dropdown-body ul li {
+    font-size: 13px;
+    color: var(--text-mid);
+    line-height: 1.6;
+  }
+  .dropdown-body strong { color: var(--text); }
+
+  /* DIVIDER */
+  .sdiv {
+    height: 1px;
+    background: var(--border);
+    margin: 16px 0;
+    max-width: 660px;
+    width: 100%;
+  }
+
+  /* NAV */
+  .nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 72px;
+    background: var(--cream);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    z-index: 99;
+  }
+  .nav-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--white);
+    color: var(--text);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .nav-btn:hover:not(:disabled) {
+    background: var(--copper);
+    color: var(--white);
+    border-color: var(--copper);
+  }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .dots {
+    display: flex;
+    gap: 7px;
+    align-items: center;
+  }
+  .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--cream-dark);
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .dot.on {
+    background: var(--copper);
+    width: 20px;
+    border-radius: 4px;
+  }
+
+  /* WELCOME SLIDE SPECIAL */
+  .welcome-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--text);
+    color: var(--cream);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+    font-weight: 500;
+  }
+  .welcome-tag span {
+    width: 6px; height: 6px;
+    background: var(--copper);
+    border-radius: 50%;
+  }
+
+  .outline-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+    max-width: 480px;
+  }
+  .outline-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--text-mid);
+    padding: 8px 14px;
+    background: var(--white);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .outline-dot {
+    width: 6px; height: 6px;
+    background: var(--copper);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* MASON CREDIT */
+  .mason-credit {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .mason-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--copper-light);
+  }
+  .mason-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .mason-title {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  /* DIFF TABLE */
+  .diff-table {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 8px;
+    max-width: 600px;
+    width: 100%;
+  }
+  .diff-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .diff-card.ai { border-top: 3px solid var(--copper); }
+  .diff-card.regular { border-top: 3px solid var(--cream-dark); }
+  .diff-card h4 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  .diff-card.ai h4 { color: var(--copper-dark); }
+  .diff-card p {
+    font-size: 13px;
+    color: var(--text-mid);
+    line-height: 1.65;
+  }
+  .diff-example {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: var(--cream);
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--text-mid);
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  /* DEV FLOW */
+  .dev-flow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+    max-width: 600px;
+  }
+  .dev-step {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .dev-arrow {
+    color: var(--copper);
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  /* DISCLAIMER MODAL */
+  .disclaimer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(28,28,28,0.75);
+    backdrop-filter: blur(6px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .disclaimer-box {
+    background: var(--white);
+    border-radius: 18px;
+    max-width: 520px;
+    width: 100%;
+    overflow: hidden;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.18);
+  }
+  .disclaimer-top {
+    background: var(--text);
+    padding: 28px 32px 22px;
+  }
+  .disclaimer-top .d-eyebrow {
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--copper-light);
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .disclaimer-top .d-eyebrow::before {
+    content: '';
+    width: 16px;
+    height: 2px;
+    background: var(--copper);
+    display: inline-block;
+  }
+  .disclaimer-top h2 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--cream);
+    line-height: 1.1;
+    letter-spacing: -0.5px;
+  }
+  .disclaimer-top h2 span { color: var(--copper-light); }
+  .disclaimer-body {
+    padding: 24px 32px;
+  }
+  .disclaimer-body p {
+    font-size: 13px;
+    color: var(--text-mid);
+    line-height: 1.75;
+    margin-bottom: 14px;
+  }
+  .disclaimer-body p:last-of-type { margin-bottom: 0; }
+  .disclaimer-body strong { color: var(--text); }
+  .disclaimer-warning {
+    background: #FFF5EC;
+    border: 1px solid rgba(196,154,108,0.3);
+    border-left: 3px solid var(--copper);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 16px 0;
+    font-size: 12px;
+    color: var(--text-mid);
+    line-height: 1.65;
+  }
+  .disclaimer-warning strong { color: var(--copper-dark); }
+  .disclaimer-footer {
+    padding: 0 32px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .disclaimer-agree {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--text-mid);
+    line-height: 1.55;
+    cursor: pointer;
+  }
+  .disclaimer-agree input[type="checkbox"] {
+    margin-top: 2px;
+    width: 15px;
+    height: 15px;
+    accent-color: var(--copper);
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .disclaimer-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--text);
+    color: var(--cream);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+    opacity: 0.4;
+    pointer-events: none;
+    letter-spacing: 0.3px;
+  }
+  .disclaimer-btn.active {
+    opacity: 1;
+    pointer-events: all;
+    background: var(--copper);
+    color: var(--white);
+  }
+  .disclaimer-btn.active:hover { background: var(--copper-dark); }
+
+  @media (max-width: 700px) {
+    .slide { padding: 24px 6vw; }
+    .lane-grid, .phase-grid { grid-template-columns: 1fr; }
+    .diff-table { grid-template-columns: 1fr; }
+    .tool-grid { grid-template-columns: 1fr; }
+    .topbar { padding: 0 20px; }
+    .slide-ghost { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- DISCLAIMER MODAL -->
+<div class="disclaimer-overlay" id="disclaimerOverlay">
+  <div class="disclaimer-box">
+    <div class="disclaimer-top">
+      <div class="d-eyebrow">A1 Alliance — Confidential</div>
+      <h2>Before you<br>continue <span>→</span></h2>
+    </div>
+    <div class="disclaimer-body">
+      <p>This material was created exclusively for members of the <strong>A1 Alliance Discord community</strong>. The frameworks, strategies, and content inside represent real knowledge built through real experience — and it is shared with members in good faith.</p>
+      <div class="disclaimer-warning">
+        <strong>⚠️ Important:</strong> Sharing, redistributing, screenshotting, or reproducing any part of this content outside of the A1 Alliance community is strictly prohibited. Members found misusing or distributing this material without authorization will be <strong>permanently removed from the server</strong>. In cases of deliberate misuse or theft of intellectual property, <strong>legal action may be pursued.</strong>
+      </div>
+      <p>By continuing, you confirm that you are a current member of the A1 Alliance and agree to keep this information within the community.</p>
+    </div>
+    <div class="disclaimer-footer">
+      <label class="disclaimer-agree">
+        <input type="checkbox" id="agreeCheck" onchange="toggleBtn()">
+        I understand this content is private to A1 Alliance members and agree not to share or redistribute it in any form.
+      </label>
+      <button class="disclaimer-btn" id="disclaimerBtn" onclick="closeDisclaimer()">I Agree — Enter the Playbook</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-wrap"><div class="progress-fill" id="progress"></div></div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-logo">A<span>1</span> INNOVATIONS</div>
+    <div style="width:1px; height:16px; background:var(--border); margin:0 4px;"></div>
+    <div class="topbar-session">A1 Alliance · Starting From 0</div>
+  </div>
+  <div class="topbar-slide-label" id="slideLabel">Welcome</div>
+</div>
+
+<!-- DECK -->
+<div class="deck" id="deck">
+
+  <!-- SLIDE 1: WELCOME -->
+  <section class="slide active" data-label="Welcome">
+    <div class="slide-ghost">01</div>
+    <div class="slide-content">
+      <div class="welcome-tag"><span></span> A1 Alliance · Aug 26, 2026</div>
+      <h1 class="slide-title">Starting<br>From <span class="copper">Zero.</span></h1>
+      <p class="slide-sub">This is everything covered in the second A1 Alliance group session — the full playbook for starting from zero in AI automation, broken down simply so anyone can understand and act on it.</p>
+      <div class="outline-list">
+        <div class="outline-item"><span class="outline-dot"></span>What AI automation actually is</div>
+        <div class="outline-item"><span class="outline-dot"></span>The market opportunity right now</div>
+        <div class="outline-item"><span class="outline-dot"></span>How to pick your lane</div>
+        <div class="outline-item"><span class="outline-dot"></span>The complete sales framework</div>
+        <div class="outline-item"><span class="outline-dot"></span>The development framework</div>
+        <div class="outline-item"><span class="outline-dot"></span>The founder roadmap</div>
+        <div class="outline-item"><span class="outline-dot"></span>What to do next</div>
+      </div>
+      <div class="mason-credit">
+        <div class="mason-avatar">M</div>
+        <div>
+          <div class="mason-name">Mason Harold</div>
+          <div class="mason-title">Founder, A1 Innovations</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 2: WHAT IS AI AUTOMATION -->
+  <section class="slide" data-label="What Is AI Automation?">
+    <div class="slide-ghost">02</div>
+    <div class="slide-content">
+      <div class="slide-eyebrow">The Foundation</div>
+      <h1 class="slide-title">Not all automation<br>is <span class="copper">the same.</span></h1>
+      <p class="slide-sub">Before you can sell it or build it, you need to understand what makes AI automation different from regular automation — because this distinction is everything.</p>
+      <div class="diff-table">
+        <div class="diff-card regular">
+          <h4>Regular Automation</h4>
+          <p>Predefined input, predefined output. Every single time, the same thing happens. No thinking, no adapting, no variation.</p>
+          <div class="diff-example">Press play → song plays. Click send → message sends. Always. No exceptions.</div>
+        </div>
+        <div class="diff-card ai">
+          <h4>AI Automation</h4>
+          <p>The system thinks and adapts. Different inputs produce different, intelligent outputs. It learns over time and gets smarter.</p>
+          <div class="diff-example">Everyone messages — AI sends a unique, personalized response to each person automatically.</div>
+        </div>
+      </div>
+      <div class="dropdowns">
+        <div class="dropdown">
+          <button class="dropdown-trigger" onclick="toggleDrop(this)">
+            <h4>Why does this distinction matter?</h4>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+          <div class="dropdown-body">
+            <p>When you're talking to a business owner, this is the difference between something they've seen before and something that genuinely surprises them. Regular automation is just software doing what it's told. AI automation is a system that handles unpredictable situations, responds intelligently to different people, and improves over time — without any extra work from the business owner.</p>
+            <p>That's why it commands real money. You're not selling a button that does one thing. You're selling a system that thinks.</p>
+          </div>
+        </div>
+        <div class="dropdown">
+          <button class="dropdown-trigger" onclick="toggleDrop(this)">
+            <h4>Why learning this now matters</h4>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+          <div class="dropdown-body">
+            <p>87% of small and mid-size business owners have no idea what AI can do for their business. That gap is your opportunity. The people who learn these skills now and start executing are positioning themselves ahead of a wave that's only going to grow. In five years, the businesses that didn't adopt AI are going to be so far behind that catching up won't be realistic.</p>
+            <p>The window is open right now. Every week you wait is a week someone else is building the track record you need.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 3: MARKET OPPORTUNITY -->
+  <section class="slide" data-label="The Market Opportunity">
+    <div class="slide-ghost">03</div>
+    <div class="slide-content">
+      <div class="slide-eyebrow">The Opportunity</div>
+      <h1 class="slide-title">The gap is<br><span class="copper">massive.</span></h1>
+      <div class="stat-block">
+        <div class="stat-num">87%</div>
+        <div class="stat-label">of small business owners have no idea what AI can do for them</div>
+      </div>
+      <p class="slide-sub" style="margin-top: 16px;">That's not a problem. That's a market. The businesses that don't know what's possible are exactly who you're here to serve.</p>
+      <div class="dropdowns">
+        <div class="dropdown">
+          <button class="dropdown-trigger" onclick="toggleDrop(this)">
+            <h4>What does 87% actually mean for you?</h4>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+          <div class="dropdown-body">
+            <p>It means the overwhelming majority of business owners you'll ever talk to have never had anyone explain what AI can realistically do inside their operation. They're not skeptical because they've tried it and it didn't work. They're skeptical because nobody has ever shown them what's possible in plain terms.</p>
+            <p>That's your job. Not to pitch technology — to show them where they're losing time and money, and to tell them you can fix it. If you can grab even 5% of the businesses that don't have AI automation yet, you're building something real.</p>
+          </div>
+        </div>
+        <div class="dropdown">
+          <button class="dropdown-trigger" onclick="toggleDrop(this)">
+            <h4>The real cost of missed calls — an example</h4>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+          <div class="dropdown-body">
+            <p>Say a business owner gets 10 calls a day. They miss 5. Their average job value is $100. That's $500 lost every single day — $2,500 a week — $10,000 a month. Every month.</p>
+            <p>Now ask yourself: if you could give them back even a portion of that, couldn't you charge $1,500 and still deliver 5x the value? That's the math behind every conversation you'll have. Find where they're losing money, solve it, and price accordingly.</p>
+          </div>
+        </div>
+        <div class="dropdown">
+          <button class="dropdown-trigger" onclick="toggleDrop(this)">
+            <h4>Why the timing is right — right now</h4>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+          <div class="dropdown-body">
+            <p>The tools to build AI automation are more accessible now than they've ever been. Two years ago, building what we build today required an engineering team. Now, with the right knowledge and the right tool stack, one person can build systems that genuinely transform how a business runs.</p>
+            <p>The gap between early movers and late adopters is widening every single month. The time to build your track record, your case studies, and your reputation is now — before the market catches up and the competition catches up with it.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 4: PICK YOUR LANE -->
+  <section class="slide" data-label="Pick Your Lane">
+    <div class="slide-ghost">04</div>
+    <div class="slide-content">
+      <div class="slide-eyebrow">Starting From Zero</div>
+      <h1 class="slide-title">First, pick<br>your <span class="copper">lane.</span></h1>
+      <p class="slide-sub">There are three ways to make money in AI automation. Pick the one that matches your strengths — and go all in on it.</p>
+      <div class="lane-grid">
+        <div class="lane-card">
+          <span class="lane-badge">Lane 01</span>
+          <h4>Sales</h4>
+          <p>You're the person who gets businesses interested, qualifies them, and books the calls. You don't build — you sell. Best for extroverts who love talking to people and building relationships.</p>
+        </div>
+        <div class="lane-card">
+          <span class="lane-badge">Lane 02</span>
+          <h4>Development</h4>
+          <p>You're the person who builds the actual systems. You solve real problems with real automations. Best for people who love building and want to focus on the technical side.</p>
+        </div>
+        <div class="lane-card">
+          <span class="lane-badge">Lane 03</span>
+          <h4>Founder</h4>
+          <p>You do both. You sell, you build, you lead. This is the hardest path and the most demanding — but it's how you build an agency. Best for people willing to grind every day.</p>
+        </div>
+      </div>
+      <div class="dropdowns" style="margin-top: 16px;">
+        <div class="dropdown">
+          <button class="dropdown-trigger" onclick="toggleDrop(this)">
+            <h4>How do you know which one is right for you?</h4>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+          <div class="dropdown-body">
+            <p><strong>Pick Sales if:</strong> You're naturally extroverted, you enjoy conversation, and the idea of cold calling doesn't terrify you. Sales is a skill that pays immediately once you have a product to sell.</p>
+            <p><strong>Pick Development if:</strong> You prefer building over talking, you enjoy figuring out how systems work, and you'd rather be on a team than running one.</p>
+            <p><strong>Pick Founder if:</strong> You want to run the whole operation, you're willing to work 12-16 hour days without guaranteed pay in the early months, and you're building something long-term — not just for yourself, but for the people on your team.</p>
+          </div>
+        </div>
+        <div class="dropdown">
+          <button class="dropdown-trigger" onclick="toggleDrop(this)">
+            <h4>What's the first thing you do once you pick a lane?</h4>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+          <div class="dropdown-body">
+            <p>You learn the skill. Actually learn it — don't just watch videos. If you're in sales, start making calls. If you're in development, start building real things. If you're a founder, do both.</p>
+            <p>Then you find your first real problem to solve. Not a theoretical one — an actual problem a real business is experiencing that's costing them time or money. Solve it. Even for free if you have to. That first result is the foundation everything else gets built on.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 5: SALES FRAMEWORK -->
+  <section class="slide" data-label="The Sales Framework">
+    <div class="slide-ghost">05</div>
+    <div class="slide-content">
+      <div class="slide-eyebrow">The Sales Playbook</div>
+      <h1 class="slide-title">How to sell<br><span class="copper">AI automation.</span></h1>
+      <p class="slide-sub">This is the framework that generates real sales. Four principles, one call flow, one objection method. Master all of it.</p>
+      <div class="dropdowns">
+        <div class="dropdown">
+          <button class="dropdown-trigger" onclick="toggleDrop(this)">
+            <h4>Principle 1 — Sell yourself, not the AI</h4>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+          <div class="dropdown-body">
+            <p>If 87% of business owners don't understand what AI is, do you think they're going to buy something they've never heard of? No. So stop leading with AI.</p>
+            <p>Lead with yourself. Come in, shake their hand, build a real relationship. Business owners buy from people they trust — not from technology they don't understand. Once you have the relationship, the sale follows naturally.</p>
+          </div>
+        </div>
+        <div class="dropdown">
+          <button class="dropdown-trigger" onclick="toggleDrop(this)">
+            <h4>Principle 2 — Keep it simple (KISS)</h4>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+          <div class="dropdown-body">
+            <p>Never talk technical. No APIs, no n8n, no "machine learning." Business owners only know their business. If you start using tech language, you've lost them.</p>
+            <p>Instead, speak in outcomes: <strong>"If we could save you two hours a day and give back 15% of your lost revenue — would that be worth 15 minutes of your time?"</strong> That's it. Time and money. That's the language every single business owner speaks fluently.</p>
+          </div>
+        </div>
+        <div class="dropdown">
+          <button class="dropdown-trigger" onclick="toggleDrop(this)">
+            <h4>Principle 3 — The 70/30 Rule</h4>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+          <div class="dropdown-body">
+            <p>70% of your conversation is listening. 30% is asking the right questions. This is one of the most important rules in sales, period.</p>
+            <p>The person asking the questions controls the conversation — because the other person is always responding to them. Ask smart questions, listen carefully to the answers, and you'll always know exactly what to build and what to charge. The business owner will literally tell you what their problem is worth if you listen long enough.</p>
+          </div>
+        </div>
+        <div class="dropdown">
+          <button class="dropdown-trigger" onclick="toggleDrop(this)">
+            <h4>Principle 4 — The 3-Call Framework</h4>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+          <div class="dropdown-body">
+            <p>You don't sell AI automation in one call. There are three:</p>
+            <ul>
+              <li><strong>Cold Call —</strong> One goal only: are they interested? That's it. Don't pitch, don't explain, don't sell. Just get them to say "tell me more."</li>
+              <li><strong>Discovery Call —</strong> This is where you find the actual problem. Ask questions. Listen. Every business has different problems — you can't build a custom solution without knowing what it is. This call is 70% listening.</li>
+              <li><strong>Solution Call —</strong> You've talked to your team, you know the problem, you've built the solution. Now you present it, show how it works, and close the deal.</li>
+            </ul>
+            <p style="margin-top:10px;">Between the discovery and solution call, you build the demo. You come to the solution call prepared — not guessing.</p>
+          </div>
+        </div>
+        <div class="dropdown">
+          <button class="dropdown-trigger" onclick="toggleDrop(this)">
+            <h4>Objection Handling — Agree, Align, Overcome</h4>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+          <div class="dropdown-body">
+            <p>Every objection gets handled the same way: <strong>Agree. Align. Overcome.</strong></p>
+            <ul>
+              <li><strong>Agree —</strong> Validate what they said. Never fight an objection head-on. "I completely understand that."</li>
+              <li><strong>Align —</strong> Show them you're on their side. "Honestly, if I were in your position, I'd probably say the same thing."</li>
+              <li><strong>Overcome —</strong> Redirect to the solution. "That's exactly why we handle all of this for you — you don't have to understand it, you just see the results."</li>
+            </ul>
+            <p style="margin-top:10px;">If you do this right, the objection becomes the reason to buy — not the reason to walk away.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 6: DEVELOPMENT FRAMEWORK -->
+  <section class="slide" data-label="The Development Framework">
+    <div class="slide-ghost">06</div>
+    <div class="slide-content">
+      <div class="slide-eyebrow">The Build Playbook</div>
+      <h1 class="slide-title">How to build<br><span class="copper">real systems.</span></h1>
+      <p class="slide-sub">Development in AI automation isn't about building for the sake of building. It's about solving real, measurable problems that businesses will pay to have eliminated.</p>
+      <div class="dev-flow">
+        <div class="dev-step">Understand the Business</div>
+        <span class="dev-arrow">→</span>
+        <div class="dev-step">Build Something Real</div>
+        <span class="dev-arrow">→</span>
+        <div class="dev-step">Solve the Problem</div>
+        <span class="dev-arrow">→</span>
+        <div class="dev-step">Maintain &amp; Grow</div>
+      </div>
+      <div class="tool-grid" style="margin-top: 16px;">
+        <div class="tool-card">
+          <div class="tool-icon">⚙️</div>
+          <div>
+            <h5>Make.com &amp; n8n</h5>
+            <p>How you build the actual automations — the workflows that connect systems and trigger actions.</p>
+          </div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-icon">💻</div>
+          <div>
+            <h5>Claude Code</h5>
+            <p>How you build the back end — CRMs, dashboards, and anything clients actually see and interact with.</p>
+          </div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-icon">🎙️</div>
+          <div>
+            <h5>VAPI</h5>
+            <p>How you build AI voice agents — the AI receptionist that handles calls, books jobs, and never sleeps.</p>
+          </div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-icon">🔗</div>
+          <div>
+            <h5>The Full Stack</h5>
+            <p>These tools together let you build complete, production-ready AI systems for real businesses.</p>
+          </div>
+        </div>
+      </div>
+      <div class="dropdowns" style="margin-top: 16px;">
+        <div class="dropdown">
+          <button class="dropdown-trigger" onclick="toggleDrop(this)">
+            <h4>The most important rule in development</h4>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+          <div class="dropdown-body">
+            <p>Solve real problems. If the problem you're solving isn't worth real money to the business, they won't pay real money for the solution. Every build starts with a clear answer to: what is this costing the business right now, in time or revenue?</p>
+            <p>If you can't answer that before you start building, stop and figure it out first. The discovery call gives you that answer. Build around it.</p>
+          </div>
+        </div>
+        <div class="dropdown">
+          <button class="dropdown-trigger" onclick="toggleDrop(this)">
+            <h4>Can you be a developer without selling?</h4>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+          <div class="dropdown-body">
+            <p>Yes — if you're on a team that has salespeople. A developer who's part of a strong agency doesn't need to sell. Their job is to build and maintain.</p>
+            <p>But if you're going solo, at some point you have to sell. You can build the best automation in the world — but if nobody knows about it and nobody buys it, it generates zero revenue. The two skills work together. The cleanest path is to be on a team where each person handles their lane.</p>
+          </div>
+        </div>
+        <div class="dropdown">
+          <button class="dropdown-trigger" onclick="toggleDrop(this)">
+            <h4>What does "maintain and grow" actually mean?</h4>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+          <div class="dropdown-body">
+            <p>Once a system is live, your job isn't done. You monitor it, fix anything that breaks, and look for ways to improve it over time as the business grows and changes.</p>
+            <p>This is also how you get recurring monthly revenue — clients pay a maintenance retainer because the system keeps running, keeps improving, and they'd lose real money if it stopped. Build well, maintain it, and it pays you every month without you having to re-sell.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 7: FOUNDER ROADMAP -->
+  <section class="slide" data-label="The Founder Roadmap">
+    <div class="slide-ghost">07</div>
+    <div class="slide-content">
+      <div class="slide-eyebrow">The Founder Playbook</div>
+      <h1 class="slide-title">How to build<br>an <span class="copper">agency.</span></h1>
+      <p class="slide-sub">Being a founder means doing everything yourself first — and then building the machine that does it without you. There are three phases. Do not skip them.</p>
+      <div class="phase-grid">
+        <div class="phase-card" data-phase="1">
+          <h4>Phase One</h4>
+          <span class="phase-target">Target: $5K Revenue</span>
+          <p>Do everything yourself. Sell it. Build it. Maintain it. Make at least $5,000 doing it before you try to bring anyone else in. Learn the hard way first.</p>
+        </div>
+        <div class="phase-card" data-phase="2">
+          <h4>Phase Two</h4>
+          <span class="phase-target">Target: $10K Revenue</span>
+          <p>Keep selling. Hire a developer and give them 30% commission. Now you can sell more because someone else is maintaining the builds you're closing.</p>
+        </div>
+        <div class="phase-card" data-phase="3">
+          <h4>Phase Three</h4>
+          <span class="phase-target">Target: Scale</span>
+          <p>Build out dedicated sales and development teams. Create positive feedback loops. Step back from the day-to-day. Work on the business, not in it.</p>
+        </div>
+      </div>
+      <div class="dropdowns" style="margin-top: 16px;">
+        <div class="dropdown">
+          <button class="dropdown-trigger" onclick="toggleDrop(this)">
+            <h4>What is a positive feedback loop?</h4>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+          <div class="dropdown-body">
+            <p>A positive feedback loop is when the success of one part of your system automatically drives success in another part. As a founder, you create these deliberately.</p>
+            <p>Example: You bring in a client → your salesperson earns commission → your developer earns commission → client gets value → client refers another client → salesperson earns more → developer earns more → the whole thing repeats and grows. You don't have to manually push each step — the system drives itself.</p>
+          </div>
+        </div>
+        <div class="dropdown">
+          <button class="dropdown-trigger" onclick="toggleDrop(this)">
+            <h4>The founder mindset — what nobody tells you</h4>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+          <div class="dropdown-body">
+            <p>Being a founder is not a side hustle. It's 12-16 hour days. It's putting in full weeks without seeing a dollar of it yet. It's delaying instant gratification for months while you build the foundation.</p>
+            <p>And the most important thing: as a founder, you put your team first. If you're building a team because you want to make more money off them — stop. The mindset is: how do I give my salespeople real skills and real money? How do I give my developers real skills and real money? Because when they win, the agency wins — and that's how you build something that actually lasts.</p>
+          </div>
+        </div>
+        <div class="dropdown">
+          <button class="dropdown-trigger" onclick="toggleDrop(this)">
+            <h4>What about legal — LLCs, contracts, NDAs?</h4>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+          <div class="dropdown-body">
+            <p>Legal structure matters — but the minimum viable approach early on is: pick a niche, pick a business name, build a basic website, and have a way to collect payments. Start there.</p>
+            <p>As you start closing bigger deals — especially deals over $1,000 — you need to get your legal foundation in place. That means an LLC, client contracts that protect both parties, NDAs for sensitive data, and liability coverage. You're building custom software that touches client systems — if something breaks and you don't have contracts, you're exposed. Don't wait until you have a problem to sort it out.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 8: WHAT TO DO NEXT -->
+  <section class="slide" data-label="What to Do Next">
+    <div class="slide-ghost">08</div>
+    <div class="slide-content">
+      <div class="slide-eyebrow">Your Starting Point</div>
+      <h1 class="slide-title">Stop reading.<br><span class="copper">Start moving.</span></h1>
+      <p class="slide-sub">Every framework in this deck is useless without execution. Here's exactly what to do starting today — no excuses, no overthinking.</p>
+      <div class="steps-list">
+        <div class="step-item">
+          <div class="step-num">01</div>
+          <div class="step-text">
+            <h5>Pick your lane today</h5>
+            <p>Sales, development, or founder. Make the decision and commit to it. Go to the Discord and declare it in your lane channel.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">02</div>
+          <div class="step-text">
+            <h5>Learn the actual skill</h5>
+            <p>Don't just read about it. If you're in sales — make your first cold call. If you're in dev — build your first automation. Do the real thing.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">03</div>
+          <div class="step-text">
+            <h5>Find one real problem to solve</h5>
+            <p>Talk to one business owner. Ask what's eating their time and where they feel like they're losing money. Listen to the answer. That's your first build.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">04</div>
+          <div class="step-text">
+            <h5>Offer it for free or cheap first</h5>
+            <p>Get the result. Get the testimonial. Get the case study. You can't charge full price without proof — so go get the proof first, then raise your price.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">05</div>
+          <div class="step-text">
+            <h5>Double down on what works</h5>
+            <p>Once you find what's converting and what's not — cut what isn't and do more of what is. That's how you scale. Not by adding complexity. By repeating what works.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <button class="nav-btn" id="prevBtn" onclick="go(-1)" disabled>←</button>
+  <div class="dots" id="dots"></div>
+  <button class="nav-btn" id="nextBtn" onclick="go(1)">→</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let cur = 0;
+
+  // Build dots
+  const dotsEl = document.getElementById('dots');
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' on' : '');
+    d.onclick = () => goTo(i);
+    dotsEl.appendChild(d);
+  });
+
+  function goTo(i) {
+    if (i < 0 || i >= total) return;
+    const prev = cur;
+    slides[prev].classList.remove('active');
+    slides[prev].classList.add('exit-left');
+    setTimeout(() => slides[prev].classList.remove('exit-left'), 500);
+    cur = i;
+    slides[cur].classList.add('active');
+    document.querySelectorAll('.dot').forEach((d, idx) => d.classList.toggle('on', idx === cur));
+    document.getElementById('progress').style.width = ((cur + 1) / total * 100) + '%';
+    document.getElementById('prevBtn').disabled = cur === 0;
+    document.getElementById('nextBtn').disabled = cur === total - 1;
+    document.getElementById('slideLabel').textContent = slides[cur].dataset.label || '';
+    // scroll slide content to top
+    slides[cur].scrollTop = 0;
+  }
+
+  function go(dir) { goTo(cur + dir); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') go(-1);
+  });
+
+  function toggleDrop(btn) {
+    const dropdown = btn.parentElement;
+    dropdown.classList.toggle('open');
+  }
+
+  // init progress
+  document.getElementById('progress').style.width = (1 / total * 100) + '%';
+
+  function toggleBtn() {
+    const checked = document.getElementById('agreeCheck').checked;
+    const btn = document.getElementById('disclaimerBtn');
+    btn.classList.toggle('active', checked);
+  }
+
+  function closeDisclaimer() {
+    const overlay = document.getElementById('disclaimerOverlay');
+    overlay.style.opacity = '0';
+    overlay.style.transition = 'opacity 0.4s ease';
+    setTimeout(() => overlay.style.display = 'none', 400);
+  }
+</script>
+</body>
+</html>
